@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
+          rel="stylesheet" type="text/css">
+    <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"
+          rel="stylesheet" type="text/css">
+    <script src="src/vexflow-min.js"></script>
+    <script src="editor.js"></script>
+</head>
+<body>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <label>Duration: </label><br/>
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default">
+                        <input type="radio" name="options" id="whole_note" autocomplete="off" checked>
+                        <img src="img/whole-note.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="half_note" autocomplete="off">
+                        <img src="img/half-note.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default active">
+                        <input type="radio" name="notes" id="quarter_note" autocomplete="off">
+                        <img src="img/quarter-note.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="8_note" autocomplete="off">
+                        <img src="img/8-note.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="16_note" autocomplete="off">
+                        <img src="img/16-note.svg" width="20px" height="20px"/>
+                    </label><br/>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="whole_rest" autocomplete="off">
+                        <img src="img/whole-rest.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="half_rest" autocomplete="off">
+                        <img src="img/half-rest.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="quarter_rest" autocomplete="off">
+                        <img src="img/quarter-rest.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="8_rest" autocomplete="off">
+                        <img src="img/8-rest.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="notes" id="16_rest" autocomplete="off">
+                        <img src="img/16-rest.svg" width="20px" height="20px"/>
+                    </label>
+                </div>
+            </div><br/>
+        <!--</div>
+        <div class="row">-->
+            <div class="col-md-4">
+                <label>Accidental: </label><br/>
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default active">
+                        <input type="radio" name="accidental" id="clear" autocomplete="off">
+                        <img width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="accidental" id="flat" autocomplete="off">
+                        <img src="img/flat.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="accidental" id="sharp" autocomplete="off">
+                        <img src="img/sharp.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="accidental" id="restore" autocomplete="off">
+                        <img src="img/restore.svg" width="20px" height="20px"/>
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="accidental" id="tie" autocomplete="off">
+                        <img src="img/tie.svg" width="20px" height="20px"/>
+                    </label>
+                </div>
+            </div><br/>
+        <!--</div>
+        <div class="row">-->
+            <div class="col-md-4">
+                <label>Tone: </label><br/>
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default active">
+                        <input type="radio" name="voice" id="bass" autocomplete="off">B
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="voice" id="tenor" autocomplete="off">T
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="voice" id="high" autocomplete="off">A
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="voice" id="soprano" autocomplete="off">S
+                    </label>
+                </div>
+            </div>
+        <!--</div>-->
+        <div class="row row-centered">
+            <div class="col-md-12 col-centered">
+                <div id="score">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
