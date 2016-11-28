@@ -11,6 +11,11 @@
           rel="stylesheet" type="text/css">
     <script src="src/vexflow-min.js"></script>
     <script src="editor.js"></script>
+    <style>
+        .descr {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 <div class="section">
@@ -60,11 +65,11 @@
                         <img src="img/16-rest.svg" width="20px" height="20px"/>
                     </label>
                 </div>
-            </div><br/>
-        <!--</div>
-        <div class="row">-->
+            </div>
+            <!--</div>
+            <div class="row">-->
             <div class="col-md-4">
-                <label>Accidental: </label><br/>
+                <label class="descr">Accidental: </label><br/>
                 <div class="btn-group" data-toggle="buttons">
                     <label class="btn btn-default active">
                         <input type="radio" name="accidental" id="clear" autocomplete="off">
@@ -87,11 +92,11 @@
                         <img src="img/tie.svg" width="20px" height="20px"/>
                     </label>
                 </div>
-            </div><br/>
-        <!--</div>
-        <div class="row">-->
+            </div>
+            <!--</div>
+            <div class="row">-->
             <div class="col-md-4">
-                <label>Tone: </label><br/>
+                <label class="descr">Tone: </label><br/>
                 <div class="btn-group" data-toggle="buttons">
                     <label class="btn btn-default active">
                         <input type="radio" name="voice" id="bass" autocomplete="off">B
@@ -107,16 +112,16 @@
                     </label>
                 </div>
             </div>
-        <!--</div>-->
-        <div class="row row-centered">
-            <div class="col-md-12 col-centered">
-                <div id="score">
+            <!--</div>-->
+            <div class="row row-centered">
+                <div class="col-md-12 col-centered">
+                    <div id="score">
 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 </body>
 </html>

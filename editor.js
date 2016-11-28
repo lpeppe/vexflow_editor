@@ -23,7 +23,7 @@ $(document).ready(function () {
 
         // set stave width
         if (trebleNotes.length < 6) {
-            staveSize = 700;
+            staveSize = 930;
         }
         else {
             // about 85 pixels per note
