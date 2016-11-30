@@ -3,10 +3,12 @@ $(document).ready(function () {
     var canvas = document.getElementById("score");
     var renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.SVG);
     var ctx = renderer.getContext();
+
     var bassoNotes = new Array();
     var tenoreNotes = new Array();
     var altoNotes = new Array();
     var sopranoNotes = new Array();
+
     var bassoVoice = new VF.Voice({num_beats: 4,  beat_value: 4});
     var tenoreVoice = new VF.Voice({num_beats: 4,  beat_value: 4});
     var altoVoice = new VF.Voice({num_beats: 4,  beat_value: 4});
@@ -23,13 +25,12 @@ $(document).ready(function () {
     processStaves();
     drawStaves();
     canvas.addEventListener("click", addNote, false);
-    //alert(bassStave.getBottomLineY());
-    altoNotes.push(new Vex.Flow.StaveNote({clef: "treble", keys: ["c/3", "e/4", "g/4"], duration: "h" }));
+    altoNotes.push(new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h" }));
     altoVoice.setStrict(false);
     altoVoice.addTickables(altoNotes);
     var formatter = new VF.Formatter().joinVoices([altoVoice]).format([altoVoice], 400);
     altoVoice.draw(ctx, trebleStave);
-    bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: ["c/3", "e/4", "g/4"], duration: "q" }));
+    bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: ["g/4"], duration: "q" }));
     bassoVoice.setStrict(false);
     bassoVoice.addTickables(bassoNotes);
     var formatter = new VF.Formatter().joinVoices([bassoVoice]).format([bassoVoice], 400);
@@ -99,27 +100,61 @@ $(document).ready(function () {
         var rect = canvas.getBoundingClientRect();
         var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
+        y = y.toFixed();
+        var diff = y%5;
+        if(diff <= 2)
+            y = y - diff;
+        else
+            y = y + (5 - diff);
+        alert(y);
         var trebleBottom = trebleStave.getBottomLineY();
         var bassBottom = bassStave.getBottomLineY();
         if(tone == "basso") {
             if(y <= bassBottom + 5 && y >= bassBottom - 65) {
+                //first note e/2, last note c/4 on the bass stave
 
             }
         }
         else if(tone == "tenore") {
             if(y <= bassBottom - 20 && y >= bassBottom - 80) {
-
+                //first note c/3, last note g/4 on the bass stave
             }
         }
         else if(tone == "alto") {
             if(y <= trebleBottom + 20 && y >= trebleBottom - 40) {
-
+                //first note g/3, last note c/5 on the treble stave
             }
         }
         else if(tone == "soprano") {
             if(y <= trebleBottom && y >= trebleBottom - 60) {
+                //first note c/4, last note a/5 on the treble stave
 
             }
+        }
+    }
+
+    function getNote(y, stave) {
+        var octave;
+        var note;
+        var bottom;
+        var diff = y%5;
+        if(diff <= 2)
+            y = y - diff;
+        else
+            y = y + (5 - diff);
+        if(stave === trebleStave) {
+            bottom = trebleStave.getBottomLineY() + 20;
+            note = 7;
+            octave = 3;
+        }
+        else if(stave === bassStave) {
+            bottom = bassStave.getBottomLineY();
+            note = 5;
+            octave = 2;
+        }
+        var pos = Math.round(y/10)*10;
+        for(i = bottom; i < bottom - 65; i--) {
+
         }
     }
 });

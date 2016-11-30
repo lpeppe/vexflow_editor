@@ -10,15 +10,67 @@
     <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"
           rel="stylesheet" type="text/css">
     <script src="src/vexflow-min.js"></script>
-    <script src="editor.js"></script>
+    <!--<script src="editor.js"></script>-->
+    <script src="src/init.js"></script>
     <style>
         .descr {
             margin-top: 20px;
+        }
+
+        .row {
+            padding-bottom: 50px;
         }
     </style>
 </head>
 <body>
 <div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <label class="descr">Time signature: </label><br/>
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default active">
+                        <input type="radio" name="time" id="2/2" autocomplete="off" checked>
+                        2<br/>2
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="time" id="2/4" autocomplete="off">
+                        2<br/>4
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="time" id="3/4" autocomplete="off">
+                        3<br/>4
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="time" id="4/4" autocomplete="off">
+                        4<br/>4
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="time" id="3/8" autocomplete="off">
+                        3<br/>8
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="time" id="6/8" autocomplete="off">
+                        6<br/>8
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <label class="descr">Key signature: </label><br/>
+                <select id="ks">
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-default">Next></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="section" style="display: none">
     <div class="container">
         <div class="row">
             <div class="col-md-4">
@@ -111,7 +163,6 @@
             <div class="row row-centered">
                 <div class="col-md-12 col-centered">
                     <div id="score">
-
                     </div>
                 </div>
             </div>
