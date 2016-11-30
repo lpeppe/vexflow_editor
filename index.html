@@ -10,7 +10,7 @@
     <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"
           rel="stylesheet" type="text/css">
     <script src="src/vexflow-min.js"></script>
-    <!--<script src="editor.js"></script>-->
+    <script src="editor.js"></script>
     <script src="src/init.js"></script>
     <style>
         .descr {
@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-<div class="section">
+<div class="section" id="firstDiv">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -65,12 +65,12 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-default">Next></button>
+                <button type="button" class="btn btn-default" id="next">Next></button>
             </div>
         </div>
     </div>
 </div>
-<div class="section" style="display: none">
+<div class="section" id="secondDiv" style="display: none">
     <div class="container">
         <div class="row">
             <div class="col-md-4">

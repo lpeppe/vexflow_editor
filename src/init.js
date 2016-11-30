@@ -5,4 +5,9 @@ $(document).ready(function () {
         option.text = key;
         keySig.add(option);
     });
+    document.getElementById("next").addEventListener("click", function () {
+        document.getElementById("firstDiv").style.display = "none";
+        document.getElementById("secondDiv").style.display = "block";
+        render();
+    }, false);
 });
