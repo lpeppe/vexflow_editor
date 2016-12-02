@@ -1,4 +1,3 @@
-//$(document).ready(function () {
 function render() {
     var VF = Vex.Flow;
     var canvas = document.getElementById("score");
@@ -27,12 +26,18 @@ function render() {
     processStaves();
     drawStaves();
     canvas.addEventListener("click", addNote, false);
-    altoNotes.push(new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}));
-    altoVoice.setStrict(false);
+    //altoVoice.setStrict(true);
+    altoVoice.setMode(3);
+    altoNotes.push(//new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
+        //new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
+        new Vex.Flow.StaveNote({clef: "treble", keys: ["a#/4"], duration: "h"}));
+    //altoVoice.setStrict(false);
+
+    //alert(altoVoice.isComplete());
     altoVoice.addTickables(altoNotes);
     var formatter = new VF.Formatter().joinVoices([altoVoice]).format([altoVoice], 400);
     altoVoice.draw(ctx, trebleStave);
-    bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: ["g/4"], duration: "q"}));
+    bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: ["d/3"], duration: "q"}));
     bassoVoice.setStrict(false);
     bassoVoice.addTickables(bassoNotes);
     var formatter = new VF.Formatter().joinVoices([bassoVoice]).format([bassoVoice], 400);
@@ -96,8 +101,9 @@ function render() {
     function addNote(e) {
         var duration = getRadioSelected("notes");
         var accidental = getRadioSelected("accidental");
-        var tone = getRadioSelected("tone");
-        var pitch = calculatePitch(e, tone);
+        var voice = getRadioSelected("voice");
+        var pitch = calculatePitch(e, voice);
+        alert(pitch);
     }
 
     //calculate the pitch based on the mouse click position
@@ -110,31 +116,36 @@ function render() {
         if (diff <= 2)
             y = y - diff;
         else
-            y = y + (5 - diff);
-        alert(y);
+            y = y*1 + (5 - diff);
         var trebleBottom = trebleStave.getBottomLineY();
         var bassBottom = bassStave.getBottomLineY();
         if (tone == "basso") {
-            if (y <= bassBottom + 5 && y >= bassBottom - 65) {
+            if (y <= bassBottom && y >= bassBottom - 60) {
                 //first note e/2, last note c/4 on the bass stave
-
+                return getNote(y, bassStave);
             }
+            return;
         }
         else if (tone == "tenore") {
-            if (y <= bassBottom - 20 && y >= bassBottom - 80) {
+            if (y <= bassBottom - 25 && y >= bassBottom - 80) {
                 //first note c/3, last note g/4 on the bass stave
+                return getNote(y, bassStave);
             }
+            return;
         }
         else if (tone == "alto") {
-            if (y <= trebleBottom + 20 && y >= trebleBottom - 40) {
+            if (y <= trebleBottom + 15 && y >= trebleBottom - 35) {
                 //first note g/3, last note c/5 on the treble stave
+                return getNote(y, trebleStave);
             }
+            return;
         }
         else if (tone == "soprano") {
             if (y <= trebleBottom && y >= trebleBottom - 60) {
                 //first note c/4, last note a/5 on the treble stave
-
+                return getNote(y, trebleStave);
             }
+            return;
         }
     }
 
@@ -146,21 +157,42 @@ function render() {
         if (diff <= 2)
             y = y - diff;
         else
-            y = y + (5 - diff);
+            y += Number((5 - diff));
         if (stave === trebleStave) {
-            bottom = trebleStave.getBottomLineY() + 20;
-            note = 7;
+            bottom = trebleStave.getBottomLineY() + 15;
+            note = 4; //c is 0, b is 6
             octave = 3;
         }
         else if (stave === bassStave) {
             bottom = bassStave.getBottomLineY();
-            note = 5;
+            note = 2; //c is 0, b is 6
             octave = 2;
         }
-        var pos = Math.round(y / 10) * 10;
-        for (i = bottom; i < bottom - 65; i--) {
-
+        for (i = bottom; i >= bottom - 80; i-=5) {
+            if(i == y)
+                break;
+            if(note == 6) {
+                note = 0;
+                octave++;
+            }
+            else
+                note++;
+        }
+        switch(note) {
+            case 0:
+                return 'c/'+octave;
+            case 1:
+                return 'd/'+octave;
+            case 2:
+                return 'e/'+octave;
+            case 3:
+                return 'f/'+octave;
+            case 4:
+                return 'g/'+octave;
+            case 5:
+                return 'a/'+octave;
+            case 6:
+                return 'b/'+octave;
         }
     }
 }
-//});
