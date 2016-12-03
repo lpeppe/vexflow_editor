@@ -22,7 +22,7 @@ function render() {
     //altoVoice.setMode(3);
     //altoNotes.push(//new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
         //new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
-        //new Vex.Flow.StaveNote({clef: "treble", keys: ["a#/4"], duration: "h"}));
+        //new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}));
     //altoVoice.setStrict(false);
 
     //alert(altoVoice.isComplete());
@@ -84,8 +84,6 @@ function render() {
         var accidental = getRadioSelected("accidental");
         var voice = getRadioSelected("voice");
         var pitch = calculatePitch(e, voice);
-        alert(pitch);
-        alert(duration);
         switch(voice) {
             case "basso":
                 bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration}));
@@ -197,10 +195,10 @@ function render() {
     }
 
     function processVoices() {
-        var bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
-        var tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4});
-        var altoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
-        var sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+        bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4, resolution: Vex.Flow.RESOLUTION});
+        tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4, resolution: Vex.Flow.RESOLUTION});
+        altoVoice = new VF.Voice({num_beats: 4, beat_value: 4, resolution: Vex.Flow.RESOLUTION});
+        sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4, resolution: Vex.Flow.RESOLUTION});
         bassoVoice.setStrict(false);
         tenoreVoice.setStrict(false);
         altoVoice.setStrict(false);
@@ -209,12 +207,38 @@ function render() {
         tenoreVoice.addTickables(tenoreNotes);
         altoVoice.addTickables(altoNotes);
         sopranoVoice.addTickables(sopranoNotes);
-        var formatter = new VF.Formatter().joinVoices([bassoVoice, tenoreVoice]).format([bassoVoice, tenoreVoice], 400);
-        formatter.joinVoices([sopranoVoice, altoVoice]).format([sopranoVoice, altoVoice], 400);
-        bassoVoice.draw(ctx, bassStave);
+        var formatter = new VF.Formatter();
+        if(bassoNotes.length != 0 && tenoreNotes.length != 0) {
+            formatter.joinVoices([bassoVoice, tenoreVoice]).format([bassoVoice, tenoreVoice], 400);
+            bassoVoice.draw(ctx, bassStave);
+            tenoreVoice.draw(ctx, bassStave);
+        }
+        else if(bassoNotes.length == 0) {
+            formatter.joinVoices([tenoreVoice]).format([tenoreVoice], 400);
+            tenoreVoice.draw(ctx, bassStave);
+        }
+        else {
+            formatter.joinVoices([bassoVoice]).format([bassoVoice], 400);
+            bassoVoice.draw(ctx, bassStave);
+        }
+        if(sopranoNotes.length != 0 && altoNotes.length != 0) {
+            formatter.joinVoices([sopranoVoice, altoVoice]).format([sopranoVoice, altoVoice], 400);
+            sopranoVoice.draw(ctx, trebleStave);
+            altoVoice.draw(ctx, trebleStave);
+        }
+        else if(sopranoNotes.length == 0) {
+            formatter.joinVoices([altoVoice]).format([altoVoice], 400);
+            altoVoice.draw(ctx, trebleStave);
+        }
+        else {
+            formatter.joinVoices([sopranoVoice]).format([sopranoVoice], 400);
+            sopranoVoice.draw(ctx, trebleStave);
+        }
+        //formatter.joinVoices([sopranoVoice, altoVoice]).format([sopranoVoice, altoVoice], 400);
+        /*bassoVoice.draw(ctx, bassStave);
         tenoreVoice.draw(ctx, bassStave);
         sopranoVoice.draw(ctx, trebleStave);
-        altoVoice.draw(ctx, trebleStave);
+        altoVoice.draw(ctx, trebleStave);*/
     }
 }
 
