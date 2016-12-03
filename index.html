@@ -29,27 +29,27 @@
             <div class="col-md-12">
                 <label class="descr">Time signature: </label><br/>
                 <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-default active">
+                    <label class="btn btn-default active" name="timeLab">
                         <input type="radio" name="time" id="2/2" autocomplete="off" checked>
                         2<br/>2
                     </label>
-                    <label class="btn btn-default">
+                    <label class="btn btn-default" name="timeLab">
                         <input type="radio" name="time" id="2/4" autocomplete="off">
                         2<br/>4
                     </label>
-                    <label class="btn btn-default">
+                    <label class="btn btn-default" name="timeLab">
                         <input type="radio" name="time" id="3/4" autocomplete="off">
                         3<br/>4
                     </label>
-                    <label class="btn btn-default">
+                    <label class="btn btn-default" name="timeLab">
                         <input type="radio" name="time" id="4/4" autocomplete="off">
                         4<br/>4
                     </label>
-                    <label class="btn btn-default">
+                    <label class="btn btn-default" name="timeLab">
                         <input type="radio" name="time" id="3/8" autocomplete="off">
                         3<br/>8
                     </label>
-                    <label class="btn btn-default">
+                    <label class="btn btn-default" name="timeLab">
                         <input type="radio" name="time" id="6/8" autocomplete="off">
                         6<br/>8
                     </label>
@@ -57,10 +57,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <label class="descr">Key signature: </label><br/>
                 <select id="ks">
                 </select>
+            </div>
+            <div class="col-md-6" id="prev">
             </div>
         </div>
         <div class="row">

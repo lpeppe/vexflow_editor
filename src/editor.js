@@ -77,13 +77,20 @@ function render() {
     }
 
     //return the radio element selected with the given name
-    function getRadioSelected(name) {
+    /*function getRadioSelected(name) {
         var elements = document.getElementsByName(name);
         for (i = 0; i < elements.length; i++) {
             if (elements[i].checked)
                 return elements[i].id;
         }
-    }
+    }*/
+    /*this.getRadioSelected = function(name) {
+        var elements = document.getElementsByName(name);
+        for (i = 0; i < elements.length; i++) {
+            if (elements[i].checked)
+                return elements[i].id;
+        }
+    }*/
 
     //check if there are no notes to display
     function isStaveEmpty() {
@@ -194,5 +201,14 @@ function render() {
             case 6:
                 return 'b/'+octave;
         }
+    }
+}
+
+//return the radio element selected with the given name
+function getRadioSelected(name) {
+    var elements = document.getElementsByName(name);
+    for (i = 0; i < elements.length; i++) {
+        if (elements[i].checked)
+            return elements[i].id;
     }
 }
