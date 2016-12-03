@@ -14,41 +14,33 @@ function render() {
     var tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4});
     var altoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
     var sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
-    var staff,
-        formatter,
-        voice,
-        noteOffsetLeft,
-        tickIndex = 0,
-        noteIndex = 0,
-        numBeats = 4,
-        beatValue = 4,
-        cursorHeight = 150;
+
     processStaves();
     drawStaves();
     canvas.addEventListener("click", addNote, false);
     //altoVoice.setStrict(true);
-    altoVoice.setMode(3);
-    altoNotes.push(//new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
+    //altoVoice.setMode(3);
+    //altoNotes.push(//new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
         //new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
-        new Vex.Flow.StaveNote({clef: "treble", keys: ["a#/4"], duration: "h"}));
+        //new Vex.Flow.StaveNote({clef: "treble", keys: ["a#/4"], duration: "h"}));
     //altoVoice.setStrict(false);
 
     //alert(altoVoice.isComplete());
-    altoVoice.addTickables(altoNotes);
+    /*altoVoice.addTickables(altoNotes);
     var formatter = new VF.Formatter().joinVoices([altoVoice]).format([altoVoice], 400);
     altoVoice.draw(ctx, trebleStave);
     bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: ["d/3"], duration: "q"}));
     bassoVoice.setStrict(false);
     bassoVoice.addTickables(bassoNotes);
     var formatter = new VF.Formatter().joinVoices([bassoVoice]).format([bassoVoice], 400);
-    bassoVoice.draw(ctx, bassStave);
+    bassoVoice.draw(ctx, bassStave);*/
 
     function processStaves() {
 
         var staveSize;
 
         // set stave width
-        if (isStaveEmpty())
+        if (isStaveEmpty() || maxNotes() < 10)
             staveSize = 930;
         else {
             // about 85 pixels per note
@@ -67,30 +59,12 @@ function render() {
 
         trebleStave.addKeySignature(keySign);
         bassStave.addKeySignature(keySign);
-        // calc offset for first note - accounts for pixels used by treble clef & time signature & key signature
-        noteOffsetLeft = trebleStave.start_x + trebleStave.glyph_start_x;
     }
 
     function drawStaves() {
         trebleStave.setContext(ctx).draw();
         bassStave.setContext(ctx).draw();
     }
-
-    //return the radio element selected with the given name
-    /*function getRadioSelected(name) {
-        var elements = document.getElementsByName(name);
-        for (i = 0; i < elements.length; i++) {
-            if (elements[i].checked)
-                return elements[i].id;
-        }
-    }*/
-    /*this.getRadioSelected = function(name) {
-        var elements = document.getElementsByName(name);
-        for (i = 0; i < elements.length; i++) {
-            if (elements[i].checked)
-                return elements[i].id;
-        }
-    }*/
 
     //check if there are no notes to display
     function isStaveEmpty() {
@@ -111,6 +85,25 @@ function render() {
         var voice = getRadioSelected("voice");
         var pitch = calculatePitch(e, voice);
         alert(pitch);
+        alert(duration);
+        switch(voice) {
+            case "basso":
+                bassoNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration}));
+                break;
+            case "tenore":
+                tenoreNotes.push(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration}));
+                break;
+            case "alto":
+                altoNotes.push(new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration}));
+                break;
+            case "soprano":
+                sopranoNotes.push(new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration}));
+                break;
+        }
+        ctx.clear();
+        processStaves();
+        drawStaves();
+        processVoices();
     }
 
     //calculate the pitch based on the mouse click position
@@ -201,6 +194,27 @@ function render() {
             case 6:
                 return 'b/'+octave;
         }
+    }
+
+    function processVoices() {
+        var bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+        var tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+        var altoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+        var sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+        bassoVoice.setStrict(false);
+        tenoreVoice.setStrict(false);
+        altoVoice.setStrict(false);
+        sopranoVoice.setStrict(false);
+        bassoVoice.addTickables(bassoNotes);
+        tenoreVoice.addTickables(tenoreNotes);
+        altoVoice.addTickables(altoNotes);
+        sopranoVoice.addTickables(sopranoNotes);
+        var formatter = new VF.Formatter().joinVoices([bassoVoice, tenoreVoice]).format([bassoVoice, tenoreVoice], 400);
+        formatter.joinVoices([sopranoVoice, altoVoice]).format([sopranoVoice, altoVoice], 400);
+        bassoVoice.draw(ctx, bassStave);
+        tenoreVoice.draw(ctx, bassStave);
+        sopranoVoice.draw(ctx, trebleStave);
+        altoVoice.draw(ctx, trebleStave);
     }
 }
 
