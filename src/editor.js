@@ -1,14 +1,17 @@
 function render() {
-    var VF = Vex.Flow;
+    VF = Vex.Flow;
     var canvas = document.getElementById("score");
     var renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.SVG);
     var ctx = renderer.getContext();
-
-    var bassoNotes = new Array();
+    var timeSign = getRadioSelected("time");
+    beatNum = timeSign.split("/")[0];
+    beatValue = timeSign.split("/")[1];
+    /*var bassoNotes = new Array();
     var tenoreNotes = new Array();
     var altoNotes = new Array();
-    var sopranoNotes = new Array();
-
+    var sopranoNotes = new Array();*/
+    var measures = [];
+    var curIndex = 0;
     //TODO parse num_beats and beat_value from the selected radio button
     var bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
     var tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4});
@@ -35,6 +38,7 @@ function render() {
     var formatter = new VF.Formatter().joinVoices([bassoVoice]).format([bassoVoice], 400);
     bassoVoice.draw(ctx, bassStave);*/
 
+    //render the staves
     function processStaves() {
 
         var staveSize;
@@ -50,7 +54,6 @@ function render() {
 
         trebleStave = new VF.Stave(10, 20, staveSize);
         bassStave = new VF.Stave(10, trebleStave.getBottomLineY() + 10, staveSize);
-        var timeSign = getRadioSelected("time");
         trebleStave.addClef("treble").addTimeSignature(timeSign);
         bassStave.addClef("bass").addTimeSignature(timeSign);
 
@@ -61,6 +64,7 @@ function render() {
         bassStave.addKeySignature(keySign);
     }
 
+    //draw the staves
     function drawStaves() {
         trebleStave.setContext(ctx).draw();
         bassStave.setContext(ctx).draw();
