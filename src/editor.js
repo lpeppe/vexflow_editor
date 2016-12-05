@@ -1,9 +1,9 @@
 function render() {
     VF = Vex.Flow;
-    var canvas = document.getElementById("score");
-    var renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.SVG);
-    var ctx = renderer.getContext();
-    var timeSign = getRadioSelected("time");
+    canvas = document.getElementById("score");
+    renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.SVG);
+    ctx = renderer.getContext();
+    timeSign = getRadioSelected("time");
     beatNum = timeSign.split("/")[0];
     beatValue = timeSign.split("/")[1];
     /*var bassoNotes = new Array();
@@ -13,14 +13,16 @@ function render() {
     var measures = [];
     var curIndex = 0;
     //TODO parse num_beats and beat_value from the selected radio button
-    var bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+    /*var bassoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
     var tenoreVoice = new VF.Voice({num_beats: 4, beat_value: 4});
     var altoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
-    var sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4});
+    var sopranoVoice = new VF.Voice({num_beats: 4, beat_value: 4});*/
 
-    processStaves();
-    drawStaves();
-    canvas.addEventListener("click", addNote, false);
+    /*processStaves();
+    drawStaves();*/
+    init();
+    measures[0].addNote(new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}), "basso");
+    alert(measures[0].isComplete("basso"));
     //altoVoice.setStrict(true);
     //altoVoice.setMode(3);
     //altoNotes.push(//new Vex.Flow.StaveNote({clef: "treble", keys: ["a/4"], duration: "h"}),
@@ -37,6 +39,18 @@ function render() {
     bassoVoice.addTickables(bassoNotes);
     var formatter = new VF.Formatter().joinVoices([bassoVoice]).format([bassoVoice], 400);
     bassoVoice.draw(ctx, bassStave);*/
+
+
+    function init() {
+        measures.push(new Measure(0));
+        measures[0].render(10);
+        measures.push(new Measure(1));
+        measures[1].render(360);
+        measures.push(new Measure(2));
+        measures[2].render(660);
+        renderer.resize(measures.length * 300 + 60, 500);
+        canvas.addEventListener("click", addNote, false);
+    }
 
     //render the staves
     function processStaves() {
