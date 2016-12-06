@@ -23,14 +23,16 @@ function render() {
 
     //renders all the measures
     function renderMeasures() {
-        ctx.clear();
         renderer.resize(measures.length * 300 + 60, 500);
-        for(i = 0; i < measures.length; i++) {
+        for(var i = 0; i < measures.length; i++)
+            measures[i].computeScale();
+        for(var i = 0; i < measures.length; i++) {
             if(i == 0)
                 measures[i].render(10);
             else
                 measures[i].render(measures[i-1].getEndX());
         }
+        //renderer.resize(calcStavesLenght() + 10, 500);
     }
 
     //add the note to the stave
@@ -145,12 +147,18 @@ function render() {
         }
     }
 
+    function calcStavesLenght() {
+        var totLength = 0;
+        for(var i = 0; i < measures.length; i++)
+            totLength += measures[i].getWidth();
+        return totLength;
+    }
 }
 
 //return the radio element selected with the given name
 function getRadioSelected(name) {
     var elements = document.getElementsByName(name);
-    for (i = 0; i < elements.length; i++) {
+    for (var i = 0; i < elements.length; i++) {
         if (elements[i].checked)
             return elements[i].id;
     }
