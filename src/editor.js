@@ -24,11 +24,11 @@ function render() {
     //renders all the measures
     function renderMeasures() {
         renderer.resize(measures.length * 300 + 60, 500);
-        for(var i = 0; i < measures.length; i++) {
-            if(i == 0)
+        for (var i = 0; i < measures.length; i++) {
+            if (i == 0)
                 measures[i].render(10);
             else
-                measures[i].render(measures[i-1].getEndX());
+                measures[i].render(measures[i - 1].getEndX());
         }
     }
 
@@ -39,20 +39,22 @@ function render() {
         var voice = getRadioSelected("voice");
         var pitch = calculatePitch(e, voice);
         //TODO if all the measure's voices are complete create a new measure
-        for(var i = 0; i < measures.length; i++) {
-            if(measures[i].isComplete(voice) == false) {
-                if(voice == "basso" || voice == "tenore")
-                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch],
-                        duration: duration}), voice);
-                else
-                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "treble", keys: [pitch],
-                        duration: duration}), voice);
+        var newNote;
+        if (voice == "basso" || voice == "tenore")
+            newNote = new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration});
+        else
+            newNote = new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration});
+        if (accidental != "clear")
+            newNote.addAccidental(0, new VF.Accidental(accidental));
+        for (var i = 0; i < measures.length; i++) {
+            if (measures[i].isComplete(voice) == false) {
+                measures[i].addNote(newNote, voice);
                 break;
             }
         }
         ctx.clear();
         renderMeasures();
-        for(var i = 0; i < measures.length; i++)
+        for (var i = 0; i < measures.length; i++)
             measures[i].drawNotes();
     }
 
@@ -66,7 +68,7 @@ function render() {
         if (diff <= 2)
             y = y - diff;
         else
-            y = y*1 + (5 - diff);
+            y = y * 1 + (5 - diff);
         var trebleBottom = measures[0].getStaveBottom("treble");
         var bassBottom = measures[0].getStaveBottom("bass");
         if (tone == "basso") {
@@ -118,37 +120,37 @@ function render() {
             note = 2; //c is 0, b is 6
             octave = 2;
         }
-        for (i = bottom; i >= bottom - 80; i-=5) {
-            if(i == y)
+        for (i = bottom; i >= bottom - 80; i -= 5) {
+            if (i == y)
                 break;
-            if(note == 6) {
+            if (note == 6) {
                 note = 0;
                 octave++;
             }
             else
                 note++;
         }
-        switch(note) {
+        switch (note) {
             case 0:
-                return 'c/'+octave;
+                return 'c/' + octave;
             case 1:
-                return 'd/'+octave;
+                return 'd/' + octave;
             case 2:
-                return 'e/'+octave;
+                return 'e/' + octave;
             case 3:
-                return 'f/'+octave;
+                return 'f/' + octave;
             case 4:
-                return 'g/'+octave;
+                return 'g/' + octave;
             case 5:
-                return 'a/'+octave;
+                return 'a/' + octave;
             case 6:
-                return 'b/'+octave;
+                return 'b/' + octave;
         }
     }
 
     function calcStavesLenght() {
         var totLength = 0;
-        for(var i = 0; i < measures.length; i++)
+        for (var i = 0; i < measures.length; i++)
             totLength += measures[i].getWidth();
         return totLength;
     }

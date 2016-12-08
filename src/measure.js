@@ -15,7 +15,6 @@ function Measure(index) {
         resolution: Vex.Flow.RESOLUTION}).setMode(3);
     this.formatter = new VF.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
-    this.scale = 1;
     this.width;
 }
 
@@ -81,6 +80,8 @@ Measure.prototype.addNote = function (note, voiceName) {
 
 //render the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
+    /*this.trebleStave = new VF.Stave(x, 20, 200);
+    this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, 200);*/
     this.computeScale();
     this.trebleStave = new VF.Stave(x, 20, this.width);
     this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
@@ -123,10 +124,7 @@ Measure.prototype.computeScale = function() {
         if(notes[noteDuration] > this.minNote)
             this.minNote = notes[noteDuration];
     }
-    this.scale = this.minNote;
-    this.width = 85*this.scale;
-    if(this.index == 0)
-        this.width += 50;
+    this.width = 85*this.minNote;
 }
 
 //check if the given voice is full or not
@@ -159,6 +157,16 @@ Measure.prototype.drawNotes = function () {
         toFormat.push(this.sopranoVoice, this.altoVoice);
     try {this.formatter.format(toFormat, this.width - 10);}
     catch(err) {}
+    /*switch(voice) {
+        case "basso":
+            this.formatter.format([this.bassoVoice], this.width - 10);
+        case "tenore":
+            this.formatter.format([this.tenoreVoice], this.width - 10);
+        case "soprano":
+            this.formatter.format([this.sopranoVoice], this.width - 10);
+        case "alto":
+            this.formatter.format([this.altoVoice], this.width - 10);
+    }*/
     this.bassoVoice.draw(ctx, this.bassStave);
     this.tenoreVoice.draw(ctx, this.bassStave);
     this.altoVoice.draw(ctx, this.trebleStave);
