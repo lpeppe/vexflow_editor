@@ -5,10 +5,14 @@ function Measure(index) {
     this.tenoreNotes = [];
     this.sopranoNotes = [];
     this.altoNotes = [];
-    this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);
-    this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);
-    this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);
-    this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
     this.formatter = new VF.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
     this.scale = 1;
@@ -30,7 +34,8 @@ Measure.prototype.addNote = function (note, voiceName) {
             }
             catch(err) {
                 this.bassoNotes.pop();
-                this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
                 this.bassoVoice.addTickables(this.bassoNotes);
                 break;
             }
@@ -42,7 +47,8 @@ Measure.prototype.addNote = function (note, voiceName) {
             }
             catch(err) {
                 this.tenoreNotes.pop();
-                this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
                 this.tenoreVoice.addTickables(this.tenoreNotes);
             }
             break;
@@ -53,7 +59,8 @@ Measure.prototype.addNote = function (note, voiceName) {
             }
             catch(err) {
                 this.altoNotes.pop();
-                this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
                 this.altoVoice.addTickables(this.altoNotes);
             }
             break;
@@ -64,7 +71,8 @@ Measure.prototype.addNote = function (note, voiceName) {
             }
             catch(err) {
                 this.sopranoNotes.pop();
-                this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue, resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
                 this.sopranoVoice.addTickables(this.sopranoNotes);
             }
             break;
@@ -74,18 +82,18 @@ Measure.prototype.addNote = function (note, voiceName) {
 //render the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
     this.computeScale();
-    /*var staveSize = 80*this.scale+20;
-    if(this.index == 0)
-        staveSize = 80*this.scale+70;*/
     this.trebleStave = new VF.Stave(x, 20, this.width);
     this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
-    console.log("Stave width: " + this.bassStave.getWidth());
     if(this.index == 0) {
         this.trebleStave.addClef("treble").addTimeSignature(timeSign);
         this.bassStave.addClef("bass").addTimeSignature(timeSign);
         var keySign = $("#ks :selected").text();
         this.trebleStave.addKeySignature(keySign);
         this.bassStave.addKeySignature(keySign);
+        this.bassStave.setNoteStartX(this.trebleStave.getNoteStartX());
+        this.bassStave.setWidth(this.bassStave.getNoteStartX()
+            - this.bassStave.getX() + this.width);
+        this.trebleStave.setWidth(this.trebleStave.getNoteStartX() - this.trebleStave.getX() + this.width);
     }
     this.trebleStave.setContext(ctx).draw();
     this.bassStave.setContext(ctx).draw();
@@ -93,7 +101,7 @@ Measure.prototype.render = function (x) {
 
 //scale is used to format notes in the measure
 Measure.prototype.computeScale = function() {
-    var notes = { "w":1, "h":2, "q":4, "8":8, "16":16, "wr":1, "hr":2, "qr":3, "8r":4, "16r":5};
+    var notes = { "w":1, "h":2, "q":4, "8":8, "16":16, "wr":1, "hr":2, "qr":4, "8r":8, "16r":16};
     for(var i = 0; i < this.bassoNotes.length; i++) {
         var noteDuration = this.bassoNotes[i].duration;
         if(notes[noteDuration] > this.minNote)
@@ -116,8 +124,7 @@ Measure.prototype.computeScale = function() {
             this.minNote = notes[noteDuration];
     }
     this.scale = this.minNote;
-    this.width = 80*this.scale;
-    console.log("Width: " + this.width);
+    this.width = 85*this.scale;
     if(this.index == 0)
         this.width += 50;
 }
@@ -141,13 +148,17 @@ Measure.prototype.getEndX = function () {
 }
 
 Measure.prototype.drawNotes = function () {
-    //this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
-    if(this.bassoNotes.length == 0 && this.tenoreNotes.length == 0)
-        this.formatter.format([this.altoVoice, this.sopranoVoice], this.width - 10);
-    else if(this.altoNotes.length == 0 && this.sopranoNotes.length == 0)
-        this.formatter.format([this.bassoVoice, this.tenoreVoice], this.width - 10);
-    else
-        this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
+    var toFormat = [];
+    if(this.bassoNotes.length != 0)
+        toFormat.push(this.bassoVoice, this.tenoreVoice);
+    if(this.tenoreNotes.length != 0)
+        toFormat.push(this.tenoreVoice, this.bassoVoice);
+    if(this.altoNotes.length != 0)
+        toFormat.push(this.altoVoice, this.sopranoVoice);
+    if(this.sopranoNotes.length != 0)
+        toFormat.push(this.sopranoVoice, this.altoVoice);
+    try {this.formatter.format(toFormat, this.width - 10);}
+    catch(err) {}
     this.bassoVoice.draw(ctx, this.bassStave);
     this.tenoreVoice.draw(ctx, this.bassStave);
     this.altoVoice.draw(ctx, this.trebleStave);
@@ -165,9 +176,4 @@ Measure.prototype.getStaveBottom = function(stave) {
 
 Measure.prototype.getWidth = function () {
     return this.trebleStave.getWidth();
-}
-
-Measure.prototype.formatAll = function () {
-    //this.formatter.joinVoices([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice]).format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.trebleStave.getWidth());
-    this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.trebleStave.getWidth() - 10);
 }

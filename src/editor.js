@@ -42,9 +42,11 @@ function render() {
         for(var i = 0; i < measures.length; i++) {
             if(measures[i].isComplete(voice) == false) {
                 if(voice == "basso" || voice == "tenore")
-                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration}), voice);
+                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch],
+                        duration: duration}), voice);
                 else
-                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration}), voice);
+                    measures[i].addNote(new Vex.Flow.StaveNote({clef: "treble", keys: [pitch],
+                        duration: duration}), voice);
                 break;
             }
         }
