@@ -73,12 +73,13 @@ Measure.prototype.addNote = function (note, voiceName) {
 
 //render the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
-    //this.computeScale();
+    this.computeScale();
     /*var staveSize = 80*this.scale+20;
     if(this.index == 0)
         staveSize = 80*this.scale+70;*/
     this.trebleStave = new VF.Stave(x, 20, this.width);
     this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
+    console.log("Stave width: " + this.bassStave.getWidth());
     if(this.index == 0) {
         this.trebleStave.addClef("treble").addTimeSignature(timeSign);
         this.bassStave.addClef("bass").addTimeSignature(timeSign);
@@ -116,6 +117,7 @@ Measure.prototype.computeScale = function() {
     }
     this.scale = this.minNote;
     this.width = 80*this.scale;
+    console.log("Width: " + this.width);
     if(this.index == 0)
         this.width += 50;
 }
@@ -139,11 +141,13 @@ Measure.prototype.getEndX = function () {
 }
 
 Measure.prototype.drawNotes = function () {
-    /*this.formatter.joinVoices([this.bassoVoice]).format([this.bassoVoice], this.trebleStave.getWidth());
-    this.formatter.joinVoices([this.tenoreVoice]).format([this.tenoreVoice], this.trebleStave.getWidth());
-    this.formatter.joinVoices([this.altoVoice]).format([this.altoVoice], this.trebleStave.getWidth());
-    this.formatter.joinVoices([this.sopranoVoice]).format([this.sopranoVoice], this.trebleStave.getWidth());*/
-    this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
+    //this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
+    if(this.bassoNotes.length == 0 && this.tenoreNotes.length == 0)
+        this.formatter.format([this.altoVoice, this.sopranoVoice], this.width - 10);
+    else if(this.altoNotes.length == 0 && this.sopranoNotes.length == 0)
+        this.formatter.format([this.bassoVoice, this.tenoreVoice], this.width - 10);
+    else
+        this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
     this.bassoVoice.draw(ctx, this.bassStave);
     this.tenoreVoice.draw(ctx, this.bassStave);
     this.altoVoice.draw(ctx, this.trebleStave);

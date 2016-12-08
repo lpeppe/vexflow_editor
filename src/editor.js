@@ -24,15 +24,12 @@ function render() {
     //renders all the measures
     function renderMeasures() {
         renderer.resize(measures.length * 300 + 60, 500);
-        for(var i = 0; i < measures.length; i++)
-            measures[i].computeScale();
         for(var i = 0; i < measures.length; i++) {
             if(i == 0)
                 measures[i].render(10);
             else
                 measures[i].render(measures[i-1].getEndX());
         }
-        //renderer.resize(calcStavesLenght() + 10, 500);
     }
 
     //add the note to the stave
@@ -42,7 +39,7 @@ function render() {
         var voice = getRadioSelected("voice");
         var pitch = calculatePitch(e, voice);
         //TODO if all the measure's voices are complete create a new measure
-        for(i = 0; i < measures.length; i++) {
+        for(var i = 0; i < measures.length; i++) {
             if(measures[i].isComplete(voice) == false) {
                 if(voice == "basso" || voice == "tenore")
                     measures[i].addNote(new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration}), voice);
@@ -53,7 +50,7 @@ function render() {
         }
         ctx.clear();
         renderMeasures();
-        for(i = 0; i < measures.length; i++)
+        for(var i = 0; i < measures.length; i++)
             measures[i].drawNotes();
     }
 
