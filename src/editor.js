@@ -130,22 +130,8 @@ function render() {
             else
                 note++;
         }
-        switch (note) {
-            case 0:
-                return 'c/' + octave;
-            case 1:
-                return 'd/' + octave;
-            case 2:
-                return 'e/' + octave;
-            case 3:
-                return 'f/' + octave;
-            case 4:
-                return 'g/' + octave;
-            case 5:
-                return 'a/' + octave;
-            case 6:
-                return 'b/' + octave;
-        }
+        var notes = {0:'c', 1:'d', 2:'e', 3:'f', 4:'g', 5:'a', 6:'b'};
+        return notes[note] + '/' + octave;
     }
 
     function calcStavesLenght() {
