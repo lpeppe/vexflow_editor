@@ -25,7 +25,7 @@ function render() {
         var size = 0;
         for(var i = 0; i < measures.length; i++)
             size += measures[i].width;
-        renderer.resize(size + 600, 500);
+        renderer.resize(size + 600, 600);
         for (var i = 0; i < measures.length; i++) {
             if (i == 0)
                 measures[i].render(10);
@@ -50,7 +50,7 @@ function render() {
             newNote.addAccidental(0, new VF.Accidental(accidental));
         var i;
         for (i = 0; i < measures.length; i++) {
-            if (measures[i].isComplete(voice) == false) {
+            if (!measures[i].isComplete(voice)) {
                 measures[i].addNote(newNote, voice);
                 break;
             }

@@ -35,9 +35,8 @@ Measure.prototype.addNote = function (note, voiceName) {
             catch(err) {
                 this.bassoNotes.pop();
                 this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
-                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);
                 this.bassoVoice.addTickables(this.bassoNotes);
-                break;
             }
             break;
         case "tenore":
@@ -48,7 +47,7 @@ Measure.prototype.addNote = function (note, voiceName) {
             catch(err) {
                 this.tenoreNotes.pop();
                 this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
-                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);
                 this.tenoreVoice.addTickables(this.tenoreNotes);
             }
             break;
@@ -60,7 +59,7 @@ Measure.prototype.addNote = function (note, voiceName) {
             catch(err) {
                 this.altoNotes.pop();
                 this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
-                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);
                 this.altoVoice.addTickables(this.altoNotes);
             }
             break;
@@ -72,7 +71,7 @@ Measure.prototype.addNote = function (note, voiceName) {
             catch(err) {
                 this.sopranoNotes.pop();
                 this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
-                    resolution: Vex.Flow.RESOLUTION}).setMode(3);;
+                    resolution: Vex.Flow.RESOLUTION}).setMode(3);
                 this.sopranoVoice.addTickables(this.sopranoNotes);
             }
             break;
@@ -81,8 +80,6 @@ Measure.prototype.addNote = function (note, voiceName) {
 
 //render the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
-    /*this.trebleStave = new VF.Stave(x, 20, 200);
-    this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, 200);*/
     this.computeScale();
     this.trebleStave = new VF.Stave(x, 20, this.width);
     this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
@@ -125,11 +122,12 @@ Measure.prototype.computeScale = function() {
         if(notes[noteDuration] > this.minNote)
             this.minNote = notes[noteDuration];
     }
-    this.width = 85*this.minNote;
+    this.width = 85 * this.minNote;
 }
 
 //check if the given voice is full or not
 Measure.prototype.isComplete = function (voiceName) {
+    var toReturn;
     switch(voiceName) {
         case "basso":
             return this.bassoVoice.isComplete();
@@ -147,31 +145,24 @@ Measure.prototype.getEndX = function () {
 }
 
 Measure.prototype.drawNotes = function () {
-    var toFormat = [];
-    if(this.bassoNotes.length != 0)
-        toFormat.push(this.bassoVoice, this.tenoreVoice);
-    if(this.tenoreNotes.length != 0)
-        toFormat.push(this.tenoreVoice, this.bassoVoice);
-    if(this.altoNotes.length != 0)
-        toFormat.push(this.altoVoice, this.sopranoVoice);
-    if(this.sopranoNotes.length != 0)
-        toFormat.push(this.sopranoVoice, this.altoVoice);
-    try {this.formatter.format(toFormat, this.width - 10);}
-    catch(err) {}
-    /*switch(voice) {
-        case "basso":
-            this.formatter.format([this.bassoVoice], this.width - 10);
-        case "tenore":
-            this.formatter.format([this.tenoreVoice], this.width - 10);
-        case "soprano":
-            this.formatter.format([this.sopranoVoice], this.width - 10);
-        case "alto":
-            this.formatter.format([this.altoVoice], this.width - 10);
-    }*/
+    this.completeVoices();
+    this.formatter.format([this.bassoVoice, this.tenoreVoice, this.altoVoice, this.sopranoVoice], this.width - 10);
     this.bassoVoice.draw(ctx, this.bassStave);
     this.tenoreVoice.draw(ctx, this.bassStave);
     this.altoVoice.draw(ctx, this.trebleStave);
     this.sopranoVoice.draw(ctx, this.trebleStave);
+    this.bassoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.bassoVoice.addTickables(this.bassoNotes);
+    this.tenoreVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.tenoreVoice.addTickables(this.tenoreNotes);
+    this.altoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.altoVoice.addTickables(this.altoNotes);
+    this.sopranoVoice = new VF.Voice({num_beats: beatNum, beat_value: beatValue,
+        resolution: Vex.Flow.RESOLUTION}).setMode(3);
+    this.sopranoVoice.addTickables(this.sopranoNotes);
 }
 
 Measure.prototype.getStaveBottom = function(stave) {
@@ -185,4 +176,19 @@ Measure.prototype.getStaveBottom = function(stave) {
 
 Measure.prototype.getWidth = function () {
     return this.trebleStave.getWidth();
+}
+
+Measure.prototype.completeVoices = function () {
+    while(!(this.bassoVoice.isComplete())){
+        this.bassoVoice.addTickable(new Vex.Flow.GhostNote({clef: "bass", keys: ["e/2"], duration: "16"}));
+    }
+    while(!(this.tenoreVoice.isComplete())){
+        this.tenoreVoice.addTickable(new Vex.Flow.GhostNote({clef: "bass", keys: ["c/3"], duration: "16"}));
+    }
+    while(!(this.altoVoice.isComplete())){
+        this.altoVoice.addTickable(new Vex.Flow.GhostNote({clef: "treble", keys: ["g/3"], duration: "16"}));
+    }
+    while(!(this.sopranoVoice.isComplete())){
+        this.sopranoVoice.addTickable(new Vex.Flow.GhostNote({clef: "treble", keys: ["c/4"], duration: "16"}));
+    }
 }
