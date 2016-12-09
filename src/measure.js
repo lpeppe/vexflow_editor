@@ -16,6 +16,7 @@ function Measure(index) {
     this.formatter = new VF.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
     this.width;
+    this.computeScale();
 }
 
 Measure.prototype.getIndex = function () {

@@ -9,6 +9,7 @@
           rel="stylesheet" type="text/css">
     <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"
           rel="stylesheet" type="text/css">
+    <script src="src/jquery.ba-throttle-debounce.min.js"></script>
     <script src="src/vexflow-debug.js"></script>
     <script src="src/measure.js"></script>
     <script src="src/editor.js"></script>
@@ -165,7 +166,9 @@
             </div>
             <div class="row row-centered">
                 <div class="col-md-12 col-centered">
-                    <div id="score">
+                    <div style="overflow-x: auto; overflow-y: hidden; width: 800px; height: 250px">
+                        <canvas id="score" height="400" width="800">
+                        </canvas>
                     </div>
                 </div>
             </div>

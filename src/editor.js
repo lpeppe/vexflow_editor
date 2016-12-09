@@ -1,7 +1,7 @@
 function render() {
     VF = Vex.Flow;
     canvas = document.getElementById("score");
-    renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.SVG);
+    renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     ctx = renderer.getContext();
     timeSign = getRadioSelected("time");
     beatNum = timeSign.split("/")[0];
@@ -10,7 +10,6 @@ function render() {
     var measures = [];
     var curIndex = 0;
     init();
-
 
     function init() {
         measures.push(new Measure(0));
@@ -23,7 +22,10 @@ function render() {
 
     //renders all the measures
     function renderMeasures() {
-        renderer.resize(measures.length * 300 + 60, 500);
+        var size = 0;
+        for(var i = 0; i < measures.length; i++)
+            size += measures[i].width;
+        renderer.resize(size + 600, 500);
         for (var i = 0; i < measures.length; i++) {
             if (i == 0)
                 measures[i].render(10);
@@ -46,12 +48,15 @@ function render() {
             newNote = new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration});
         if (accidental != "clear")
             newNote.addAccidental(0, new VF.Accidental(accidental));
-        for (var i = 0; i < measures.length; i++) {
+        var i;
+        for (i = 0; i < measures.length; i++) {
             if (measures[i].isComplete(voice) == false) {
                 measures[i].addNote(newNote, voice);
                 break;
             }
         }
+        if(i == measures.length - 2)
+            measures.push(new Measure(i+2));
         ctx.clear();
         renderMeasures();
         for (var i = 0; i < measures.length; i++)
