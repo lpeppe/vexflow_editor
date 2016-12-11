@@ -91,13 +91,14 @@ function render() {
                 return i;
     }
 
-    /*function calcNoteIndex(index, voiceName, x) {
-        for(var note in measures[index].voices[voiceName].getTickables()) {
-            if(measures[index].voices[voiceName].getTickables()[note] instanceof VF.StaveNote) {
+    function calcNoteIndex(index, voiceName, x) {
+        var notes = measures[index].voices[voiceName].getTickables();
+        for(var note in notes) {
+            if(notes[note] instanceof VF.StaveNote) {
 
             }
         }
-    }*/
+    }
 
     //TODO pass x and y from processClick
     //add the note to the stave
