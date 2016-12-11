@@ -36,7 +36,7 @@ function render() {
 
     function processClick(e) {
         var rect = canvas.getBoundingClientRect();
-        var x =  e.clientX - rect.left;
+        var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
         var i = getMeasureIndex(x);
         var found = false;
@@ -44,17 +44,17 @@ function render() {
             addNote(e);
         else {
             loop:
-            for(var voiceName in measures[i].voices) {
-                for(var note in measures[i].voices[voiceName].getTickables()) {
-                    if(measures[i].voices[voiceName].getTickables()[note] instanceof VF.StaveNote &&
-                        isSelected(measures[i].voices[voiceName].getTickables()[note], x, y)) {
-                        found = true;
-                        colorNote(measures[i].voices[voiceName].getTickables()[note], i, voiceName);
-                        break loop;
+                for (var voiceName in measures[i].voices) {
+                    for (var note in measures[i].voices[voiceName].getTickables()) {
+                        if (measures[i].voices[voiceName].getTickables()[note] instanceof VF.StaveNote &&
+                            isSelected(measures[i].voices[voiceName].getTickables()[note], x, y)) {
+                            found = true;
+                            colorNote(measures[i].voices[voiceName].getTickables()[note], i, voiceName);
+                            break loop;
+                        }
                     }
                 }
-            }
-            if(!found)
+            if (!found)
                 addNote(e);
         }
     }
@@ -62,8 +62,8 @@ function render() {
     //color the note red
     //index = the measure index
     function colorNote(note, index, voiceName) {
-        for(var n in measures[index].notesArr[voiceName]) {
-            if(measures[index].notesArr[voiceName][n] == note) {
+        for (var n in measures[index].notesArr[voiceName]) {
+            if (measures[index].notesArr[voiceName][n] == note) {
                 note.setStyle({strokeStyle: "red", stemStyle: "red", fillStyle: "red"});
                 measures[index].notesArr[voiceName][n] = note;
                 ctx.clear();
@@ -78,8 +78,8 @@ function render() {
     //check if the mouse has clicked the given note
     function isSelected(note, x, y) {
         var bb = note.getBoundingBox();
-        if(Math.abs(x - bb.getX()) < bb.getW())
-            if(Math.abs(y - bb.getY()) < bb.getH())
+        if (Math.abs(x - bb.getX()) < bb.getW())
+            if (Math.abs(y - bb.getY()) < bb.getH())
                 return true;
         return false;
     }
@@ -87,17 +87,21 @@ function render() {
     //return the index of the measure clicked
     function getMeasureIndex(x) {
         for (var i = 0; i < measures.length; i++)
-            if (x >= measures[i].bassStave.getNoteStartX() && x <= measures[i].bassStave.getNoteEndX())
+            if (x >= measures[i].bassStave.getX() && x <= measures[i].bassStave.getNoteEndX())
                 return i;
     }
 
     function calcNoteIndex(index, voiceName, x) {
         var notes = measures[index].voices[voiceName].getTickables();
-        for(var note in notes) {
-            if(notes[note] instanceof VF.StaveNote) {
-
-            }
+        var tmp = [];
+        for (var i in notes)
+            if (notes[i] instanceof VF.StaveNote)
+                tmp.push(notes[i]);
+        for (var i = 0; i < tmp.length; i++) {
+            if (x < tmp[i].getBoundingBox().getX())
+                return i;
         }
+        return i++;
     }
 
     //TODO pass x and y from processClick
@@ -114,20 +118,13 @@ function render() {
             newNote = new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration});
         if (accidental != "clear")
             newNote.addAccidental(0, new VF.Accidental(accidental));
-        var i;
-        for (i = 0; i < measures.length; i++) {
-            if (!measures[i].isComplete(voice)) {
-                measures[i].addNote(newNote, voice);
-                break;
-            }
-        }
-        /*var i = getMeasureIndex(x);
-        if(measures[i].isEmpty())
-            measures[i].addNote(newNote, voice);
-        else if(!measures[i].isComplete()) {
+        var i = getMeasureIndex(e.clientX - canvas.getBoundingClientRect().left);
+        if (measures[i].isEmpty())
+            measures[i].addNote(newNote, voice, 0);
+        else {
             var pos = calcNoteIndex(i, voice, e.clientX - canvas.getBoundingClientRect().left);
             measures[i].addNote(newNote, voice, pos);
-        }*/
+        }
         if (i == measures.length - 2)
             measures.push(new Measure(i + 2));
         ctx.clear();

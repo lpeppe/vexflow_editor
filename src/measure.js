@@ -37,15 +37,20 @@ Measure.prototype.getIndex = function () {
 
 //adds a note in the measure
 //in case adding the note creates an error, the voice is restored to the previous state
-Measure.prototype.addNote = function (note, voiceName) {
-    this.notesArr[voiceName].push(note);
+Measure.prototype.addNote = function (note, voiceName, index) {
+    this.notesArr[voiceName].splice(index, 0, note);
     try {
         if (voiceName == "basso" || voiceName == "alto")
             note.setStemDirection(-1);
-        this.voices[voiceName].addTickable(note);
+        this.voices[voiceName] = new VF.Voice({
+            num_beats: beatNum, beat_value: beatValue,
+            resolution: Vex.Flow.RESOLUTION
+        }).setMode(3);
+        this.voices[voiceName].addTickables(this.notesArr[voiceName]);
     }
     catch (err) {
-        this.notesArr[voiceName].pop();
+        //this.notesArr[voiceName].pop();
+        this.notesArr[voiceName].splice(index, 1);
         this.voices[voiceName] = new VF.Voice({
             num_beats: beatNum, beat_value: beatValue,
             resolution: Vex.Flow.RESOLUTION
@@ -110,14 +115,6 @@ Measure.prototype.drawNotes = function () {
         else
             this.voices[voice].draw(ctx, this.trebleStave);
     }
-    //console.log(this.voices["basso"].getTickables()[0].getBoundingBox().getX())
-    /*for (var voice in this.voices) {
-        this.voices[voice] = new VF.Voice({
-            num_beats: beatNum, beat_value: beatValue,
-            resolution: Vex.Flow.RESOLUTION
-        }).setMode(3);
-        this.voices[voice].addTickables(this.notesArr[voice]);
-    }*/
 }
 
 Measure.prototype.getStaveBottom = function (stave) {
@@ -150,8 +147,8 @@ Measure.prototype.restoreVoices = function () {
 }
 
 Measure.prototype.isEmpty = function () {
-    for(var voiceName in this.notesArr)
-        if(this.notesArr[voiceName].length > 0)
+    for (var voiceName in this.notesArr)
+        if (this.notesArr[voiceName].length > 0)
             return false;
     return true;
 }
