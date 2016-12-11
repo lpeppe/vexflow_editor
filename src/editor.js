@@ -6,7 +6,9 @@ function render() {
     timeSign = getRadioSelected("time");
     beatNum = timeSign.split("/")[0];
     beatValue = timeSign.split("/")[1];
+    document.getElementById("del").addEventListener("click", delNote, false);
 
+    var selectedNote = [];
     var measures = [];
     var curIndex = 0;
     init();
@@ -50,6 +52,9 @@ function render() {
                             isSelected(measures[i].voices[voiceName].getTickables()[note], x, y)) {
                             found = true;
                             colorNote(measures[i].voices[voiceName].getTickables()[note], i, voiceName);
+                            selectedNote["note"] = measures[i].voices[voiceName].getTickables()[note];
+                            selectedNote["voiceName"] = voiceName;
+                            selectedNote["index"] = i;
                             break loop;
                         }
                     }
@@ -66,10 +71,7 @@ function render() {
             if (measures[index].notesArr[voiceName][n] == note) {
                 note.setStyle({strokeStyle: "red", stemStyle: "red", fillStyle: "red"});
                 measures[index].notesArr[voiceName][n] = note;
-                ctx.clear();
-                renderMeasures();
-                for (var i = 0; i < measures.length; i++)
-                    measures[i].drawNotes();
+                renderAndDraw();
                 break;
             }
         }
@@ -104,6 +106,14 @@ function render() {
         return i++;
     }
 
+    function delNote() {
+        var notes = measures[selectedNote["index"]].notesArr[selectedNote["voiceName"]];
+        for(var i in notes)
+            if(notes[i] == selectedNote["note"])
+                notes.splice(i, 1);
+        renderAndDraw();
+    }
+
     //TODO pass x and y from processClick
     //add the note to the stave
     function addNote(e) {
@@ -127,6 +137,10 @@ function render() {
         }
         if (i == measures.length - 2)
             measures.push(new Measure(i + 2));
+        renderAndDraw();
+    }
+
+    function renderAndDraw() {
         ctx.clear();
         renderMeasures();
         for (var i = 0; i < measures.length; i++)
