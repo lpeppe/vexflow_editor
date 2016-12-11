@@ -17,13 +17,13 @@ function render() {
         measures.push(new Measure(2));
         measures.push(new Measure(3));
         renderMeasures();
-        canvas.addEventListener("click", addNote, false);
+        canvas.addEventListener("click", processClick, false);
     }
 
     //renders all the measures
     function renderMeasures() {
         var size = 0;
-        for(var i = 0; i < measures.length; i++)
+        for (var i = 0; i < measures.length; i++)
             size += measures[i].width;
         renderer.resize(size + 600, 600);
         for (var i = 0; i < measures.length; i++) {
@@ -34,13 +34,78 @@ function render() {
         }
     }
 
+    function processClick(e) {
+        var rect = canvas.getBoundingClientRect();
+        var x =  e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var i = getMeasureIndex(x);
+        var found = false;
+        if (measures[i].isEmpty())
+            addNote(e);
+        else {
+            loop:
+            for(var voiceName in measures[i].voices) {
+                for(var note in measures[i].voices[voiceName].getTickables()) {
+                    if(measures[i].voices[voiceName].getTickables()[note] instanceof VF.StaveNote &&
+                        isSelected(measures[i].voices[voiceName].getTickables()[note], x, y)) {
+                        found = true;
+                        colorNote(measures[i].voices[voiceName].getTickables()[note], i, voiceName);
+                        break loop;
+                    }
+                }
+            }
+            if(!found)
+                addNote(e);
+        }
+    }
+
+    //color the note red
+    //index = the measure index
+    function colorNote(note, index, voiceName) {
+        for(var n in measures[index].notesArr[voiceName]) {
+            if(measures[index].notesArr[voiceName][n] == note) {
+                note.setStyle({strokeStyle: "red", stemStyle: "red", fillStyle: "red"});
+                measures[index].notesArr[voiceName][n] = note;
+                ctx.clear();
+                renderMeasures();
+                for (var i = 0; i < measures.length; i++)
+                    measures[i].drawNotes();
+                break;
+            }
+        }
+    }
+
+    //check if the mouse has clicked the given note
+    function isSelected(note, x, y) {
+        var bb = note.getBoundingBox();
+        if(Math.abs(x - bb.getX()) < bb.getW())
+            if(Math.abs(y - bb.getY()) < bb.getH())
+                return true;
+        return false;
+    }
+
+    //return the index of the measure clicked
+    function getMeasureIndex(x) {
+        for (var i = 0; i < measures.length; i++)
+            if (x >= measures[i].bassStave.getNoteStartX() && x <= measures[i].bassStave.getNoteEndX())
+                return i;
+    }
+
+    /*function calcNoteIndex(index, voiceName, x) {
+        for(var note in measures[index].voices[voiceName].getTickables()) {
+            if(measures[index].voices[voiceName].getTickables()[note] instanceof VF.StaveNote) {
+
+            }
+        }
+    }*/
+
+    //TODO pass x and y from processClick
     //add the note to the stave
     function addNote(e) {
         var duration = getRadioSelected("notes");
         var accidental = getRadioSelected("accidental");
         var voice = getRadioSelected("voice");
         var pitch = calculatePitch(e, voice);
-        //TODO if all the measure's voices are complete create a new measure
         var newNote;
         if (voice == "basso" || voice == "tenore")
             newNote = new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration});
@@ -55,8 +120,15 @@ function render() {
                 break;
             }
         }
-        if(i == measures.length - 2)
-            measures.push(new Measure(i+2));
+        /*var i = getMeasureIndex(x);
+        if(measures[i].isEmpty())
+            measures[i].addNote(newNote, voice);
+        else if(!measures[i].isComplete()) {
+            var pos = calcNoteIndex(i, voice, e.clientX - canvas.getBoundingClientRect().left);
+            measures[i].addNote(newNote, voice, pos);
+        }*/
+        if (i == measures.length - 2)
+            measures.push(new Measure(i + 2));
         ctx.clear();
         renderMeasures();
         for (var i = 0; i < measures.length; i++)
@@ -66,7 +138,7 @@ function render() {
     //calculate the pitch based on the mouse click position
     function calculatePitch(e, tone) {
         var rect = canvas.getBoundingClientRect();
-        var x = e.clientX - rect.left;
+        //console.log(x)
         var y = e.clientY - rect.top;
         y = y.toFixed();
         var diff = y % 5;
@@ -135,7 +207,7 @@ function render() {
             else
                 note++;
         }
-        var notes = {0:'c', 1:'d', 2:'e', 3:'f', 4:'g', 5:'a', 6:'b'};
+        var notes = {0: 'c', 1: 'd', 2: 'e', 3: 'f', 4: 'g', 5: 'a', 6: 'b'};
         return notes[note] + '/' + octave;
     }
 

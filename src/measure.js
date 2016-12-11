@@ -76,6 +76,7 @@ Measure.prototype.render = function (x) {
 
 //scale is used to format notes in the measure
 Measure.prototype.computeScale = function () {
+    this.restoreVoices();
     var notes = {"w": 1, "h": 2, "q": 4, "8": 8, "16": 16, "wr": 1, "hr": 2, "qr": 4, "8r": 8, "16r": 16};
     for (var voiceName in this.notesArr) {
         for (var i = 0; i < this.notesArr[voiceName].length; i++) {
@@ -89,6 +90,7 @@ Measure.prototype.computeScale = function () {
 
 //check if the given voice is full or not
 Measure.prototype.isComplete = function (voiceName) {
+    this.restoreVoices();
     return this.voices[voiceName].isComplete();
 }
 
@@ -108,13 +110,14 @@ Measure.prototype.drawNotes = function () {
         else
             this.voices[voice].draw(ctx, this.trebleStave);
     }
-    for (var voice in this.voices) {
+    //console.log(this.voices["basso"].getTickables()[0].getBoundingBox().getX())
+    /*for (var voice in this.voices) {
         this.voices[voice] = new VF.Voice({
             num_beats: beatNum, beat_value: beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3);
         this.voices[voice].addTickables(this.notesArr[voice]);
-    }
+    }*/
 }
 
 Measure.prototype.getStaveBottom = function (stave) {
@@ -134,4 +137,21 @@ Measure.prototype.completeVoices = function () {
     for (var voice in this.voices)
         while (!this.voices[voice].isComplete())
             this.voices[voice].addTickable(new Vex.Flow.GhostNote({clef: "bass", keys: ["e/2"], duration: "16"}));
+}
+
+Measure.prototype.restoreVoices = function () {
+    for (var voice in this.voices) {
+        this.voices[voice] = new VF.Voice({
+            num_beats: beatNum, beat_value: beatValue,
+            resolution: Vex.Flow.RESOLUTION
+        }).setMode(3);
+        this.voices[voice].addTickables(this.notesArr[voice]);
+    }
+}
+
+Measure.prototype.isEmpty = function () {
+    for(var voiceName in this.notesArr)
+        if(this.notesArr[voiceName].length > 0)
+            return false;
+    return true;
 }
