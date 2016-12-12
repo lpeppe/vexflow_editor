@@ -49,12 +49,22 @@ function render() {
                 for (var voiceName in measures[i].voices) {
                     for (var note in measures[i].voices[voiceName].getTickables()) {
                         if (measures[i].voices[voiceName].getTickables()[note] instanceof VF.StaveNote &&
-                            isSelected(measures[i].voices[voiceName].getTickables()[note], x, y)) {
+                            isSelected(measures[i].voices[voiceName].getTickables()[note], x, y, voiceName)) {
                             found = true;
-                            colorNote(measures[i].voices[voiceName].getTickables()[note], i, voiceName);
-                            selectedNote["note"] = measures[i].voices[voiceName].getTickables()[note];
-                            selectedNote["voiceName"] = voiceName;
-                            selectedNote["index"] = i;
+                            var foundNote = measures[i].voices[voiceName].getTickables()[note];
+                            if(foundNote == selectedNote["note"]) {
+                                colorNote(foundNote, i, voiceName, "black");
+                                selectedNote = [];
+                            }
+                            else {
+                                //console.log(selectedNote.length)
+                                if(Object.keys(selectedNote).length > 0)
+                                    colorNote(selectedNote["note"], selectedNote["index"], selectedNote["voiceName"], "black");
+                                colorNote(foundNote, i, voiceName, "red");
+                                selectedNote["note"] = foundNote;
+                                selectedNote["voiceName"] = voiceName;
+                                selectedNote["index"] = i;
+                            }
                             break loop;
                         }
                     }
@@ -66,10 +76,11 @@ function render() {
 
     //color the note red
     //index = the measure index
-    function colorNote(note, index, voiceName) {
+    function colorNote(note, index, voiceName, color) {
         for (var n in measures[index].notesArr[voiceName]) {
             if (measures[index].notesArr[voiceName][n] == note) {
-                note.setStyle({strokeStyle: "red", stemStyle: "red", fillStyle: "red"});
+                //note.setStyle({strokeStyle: color, stemStyle: color, fillStyle: color});
+                note.setStyle({fillStyle: color});
                 measures[index].notesArr[voiceName][n] = note;
                 renderAndDraw();
                 break;
@@ -78,10 +89,13 @@ function render() {
     }
 
     //check if the mouse has clicked the given note
-    function isSelected(note, x, y) {
+    function isSelected(note, x, y, voiceName) {
         var bb = note.getBoundingBox();
-        if (Math.abs(x - bb.getX()) < bb.getW())
-            if (Math.abs(y - bb.getY()) < bb.getH())
+        var offset = 0;
+        if(voiceName == "tenore" || voiceName == "soprano") //if the stem is up the height must be lowered by 30
+            offset = 30;
+        if(x >= bb.getX() && x <= bb.getX() + bb.getW())
+            if(y >= bb.getY() + offset && y <= bb.getY() + 10 + offset)
                 return true;
         return false;
     }
@@ -111,6 +125,7 @@ function render() {
         for(var i in notes)
             if(notes[i] == selectedNote["note"])
                 notes.splice(i, 1);
+        measures[selectedNote["index"]].minNote = 1; //reset the min note to resize the measure properly
         renderAndDraw();
     }
 
