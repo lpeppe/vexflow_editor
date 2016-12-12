@@ -156,7 +156,7 @@ function render() {
             var pos = calcNoteIndex(i, voice, e.clientX - canvas.getBoundingClientRect().left);
             measures[i].addNote(newNote, voice, pos);
         }
-        if (i == measures.length - 2)
+        if (i >= measures.length - 2)
             measures.push(new Measure(i + 2));
         renderAndDraw();
     }
