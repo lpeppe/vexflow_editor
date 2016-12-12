@@ -27,7 +27,7 @@ function render() {
         var size = 0;
         for (var i = 0; i < measures.length; i++)
             size += measures[i].width;
-        renderer.resize(size + 600, 600);
+        renderer.resize(size + 1500, 600);
         for (var i = 0; i < measures.length; i++) {
             if (i == 0)
                 measures[i].render(10);
@@ -94,6 +94,12 @@ function render() {
         var offset = 0;
         if(voiceName == "tenore" || voiceName == "soprano") //if the stem is up the height must be lowered by 30
             offset = 30;
+        else if(note.isRest() && note.duration == "q")
+            offset = 10;
+        else if(note.isRest() && note.duration == "h")
+            offset = -10;
+        else if(note.isRest() && note.duration == "16")
+            offset = 5;
         if(x >= bb.getX() && x <= bb.getX() + bb.getW())
             if(y >= bb.getY() + offset && y <= bb.getY() + 10 + offset)
                 return true;
