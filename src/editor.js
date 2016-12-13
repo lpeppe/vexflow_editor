@@ -6,9 +6,9 @@ function render() {
     timeSign = getRadioSelected("time");
     beatNum = timeSign.split("/")[0];
     beatValue = timeSign.split("/")[1];
-    document.getElementById("del").addEventListener("click", delNote, false);
+    document.getElementById("del").addEventListener("click", delNotes, false);
 
-    var selectedNote = [];
+    var selectedNotes = [];
     var measures = [];
     var curIndex = 0;
     init();
@@ -52,19 +52,28 @@ function render() {
                             isSelected(measures[i].voices[voiceName].getTickables()[note], x, y, voiceName)) {
                             found = true;
                             var foundNote = measures[i].voices[voiceName].getTickables()[note];
-                            if(foundNote == selectedNote["note"]) {
-                                colorNote(foundNote, i, voiceName, "black");
-                                selectedNote = [];
+                            for (var n in selectedNotes) {
+                                if (foundNote == selectedNotes[n]["note"]) {
+                                    console.log('hi')
+                                    console.log(n)
+                                    colorNote(foundNote, i, voiceName, "black");
+                                    selectedNotes.splice(Number(n), 1);
+                                    break loop;
+                                }
                             }
-                            else {
-                                //console.log(selectedNote.length)
-                                if(Object.keys(selectedNote).length > 0)
-                                    colorNote(selectedNote["note"], selectedNote["index"], selectedNote["voiceName"], "black");
-                                colorNote(foundNote, i, voiceName, "red");
-                                selectedNote["note"] = foundNote;
-                                selectedNote["voiceName"] = voiceName;
-                                selectedNote["index"] = i;
-                            }
+                            /*if(Object.keys(selectedNotes[0]).length == 0) {
+                             selectedNotes[0] = {"note": foundNote, "voiceName": voiceName, "index": i};
+                             }
+                             else if(Object.keys(selectedNotes[1]).length == 0) {
+                             selectedNotes[1] = {"note": foundNote, "voiceName": voiceName, "index": i};
+                             }
+                             else {
+                             colorNote(selectedNotes[0]["note"], selectedNotes[0]["index"], selectedNotes[0]["voiceName"], "black");
+                             selectedNotes.shift();
+                             selectedNotes[1] = {"note": foundNote, "voiceName": voiceName, "index": i};
+                             }*/
+                            selectedNotes.push({"note": foundNote, "voiceName": voiceName, "index": i});
+                            colorNote(foundNote, i, voiceName, "red");
                             break loop;
                         }
                     }
@@ -92,16 +101,16 @@ function render() {
     function isSelected(note, x, y, voiceName) {
         var bb = note.getBoundingBox();
         var offset = 0;
-        if(voiceName == "tenore" || voiceName == "soprano") //if the stem is up the height must be lowered by 30
+        if (voiceName == "tenore" || voiceName == "soprano") //if the stem is up the height must be lowered by 30
             offset = 30;
-        else if(note.isRest() && note.duration == "q")
+        else if (note.isRest() && note.duration == "q")
             offset = 10;
-        else if(note.isRest() && note.duration == "h")
+        else if (note.isRest() && note.duration == "h")
             offset = -10;
-        else if(note.isRest() && note.duration == "16")
+        else if (note.isRest() && note.duration == "16")
             offset = 5;
-        if(x >= bb.getX() && x <= bb.getX() + bb.getW())
-            if(y >= bb.getY() + offset && y <= bb.getY() + 10 + offset)
+        if (x >= bb.getX() && x <= bb.getX() + bb.getW())
+            if (y >= bb.getY() + offset && y <= bb.getY() + 10 + offset)
                 return true;
         return false;
     }
@@ -126,12 +135,14 @@ function render() {
         return i++;
     }
 
-    function delNote() {
-        var notes = measures[selectedNote["index"]].notesArr[selectedNote["voiceName"]];
-        for(var i in notes)
-            if(notes[i] == selectedNote["note"])
-                notes.splice(i, 1);
-        measures[selectedNote["index"]].minNote = 1; //reset the min note to resize the measure properly
+    function delNotes() {
+        for (var i in selectedNotes) {
+            var notes = measures[selectedNotes[i]["index"]].notesArr[selectedNotes[i]["voiceName"]];
+            for (var j in notes)
+                if (notes[j] == selectedNotes[i]["note"])
+                    notes.splice(Number(j), 1);
+            measures[selectedNotes[i]["index"]].minNote = 1; //reset the min note to resize the measure properly
+        }
         renderAndDraw();
     }
 
