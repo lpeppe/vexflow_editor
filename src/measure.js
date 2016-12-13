@@ -25,6 +25,7 @@ function Measure(index) {
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3)
     };
+    this.ties = [];
     this.formatter = new VF.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
     this.width;
@@ -115,6 +116,37 @@ Measure.prototype.drawNotes = function () {
         else
             this.voices[voice].draw(ctx, this.trebleStave);
     }
+}
+
+Measure.prototype.renderTies = function () {
+    for (var i in this.ties) {
+        var hasFirst = false;
+        var hasLast = false;
+        var cont = 0;
+        loop:
+            for (var voiceName in this.notesArr) {
+                for (var j in this.notesArr[voiceName]) {
+                    if (hasFirst)
+                        cont++;
+                    if (this.notesArr[voiceName][j] == this.ties[i].first_note) {
+                        hasFirst = true;
+                    }
+                    if (this.notesArr[voiceName][j] == this.ties[i].last_note) {
+                        hasLast = true;
+                        if (!hasFirst || cont > 1) {
+                            console.log('hi')
+                            this.ties.splice(Number(i), 1);
+                        }
+                        break loop;
+                    }
+                }
+            }
+        if (!hasLast)
+            this.ties.splice(Number(i), 1);
+    }
+    this.ties.forEach(function (t) {
+        t.setContext(ctx).draw()
+    })
 }
 
 Measure.prototype.getStaveBottom = function (stave) {

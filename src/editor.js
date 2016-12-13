@@ -7,6 +7,7 @@ function render() {
     beatNum = timeSign.split("/")[0];
     beatValue = timeSign.split("/")[1];
     document.getElementById("del").addEventListener("click", delNotes, false);
+    document.getElementById("tie").addEventListener("click", tie, false);
 
     var selectedNotes = [];
     var measures = [];
@@ -54,8 +55,6 @@ function render() {
                             var foundNote = measures[i].voices[voiceName].getTickables()[note];
                             for (var n in selectedNotes) {
                                 if (foundNote == selectedNotes[n]["note"]) {
-                                    console.log('hi')
-                                    console.log(n)
                                     colorNote(foundNote, i, voiceName, "black");
                                     selectedNotes.splice(Number(n), 1);
                                     break loop;
@@ -143,7 +142,26 @@ function render() {
                     notes.splice(Number(j), 1);
             measures[selectedNotes[i]["index"]].minNote = 1; //reset the min note to resize the measure properly
         }
+        selectedNotes.splice(0, selectedNotes.length)
         renderAndDraw();
+    }
+
+    function tie() {
+        console.log(selectedNotes.length)
+        if (selectedNotes.length == 2 && selectedNotes[0]["index"] == selectedNotes[1]["index"] &&
+            selectedNotes[0]["note"].getKeys()[0] == selectedNotes[1]["note"].getKeys()[0] &&
+            selectedNotes[0]["voiceName"] == selectedNotes[1]["voiceName"]) {
+            measures[selectedNotes[0]["index"]].ties.push(
+                new VF.StaveTie({
+                    first_note: selectedNotes[0]["note"],
+                    last_note: selectedNotes[1]["note"],
+                    first_indices: [0],
+                    last_indices: [0]
+                })
+            );
+            renderAndDraw();
+
+        }
     }
 
     //TODO pass x and y from processClick
@@ -175,14 +193,15 @@ function render() {
     function renderAndDraw() {
         ctx.clear();
         renderMeasures();
-        for (var i = 0; i < measures.length; i++)
+        for (var i = 0; i < measures.length; i++) {
             measures[i].drawNotes();
+            measures[i].renderTies();
+        }
     }
 
     //calculate the pitch based on the mouse click position
     function calculatePitch(e, tone) {
         var rect = canvas.getBoundingClientRect();
-        //console.log(x)
         var y = e.clientY - rect.top;
         y = y.toFixed();
         var diff = y % 5;
