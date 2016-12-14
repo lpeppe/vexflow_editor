@@ -155,17 +155,30 @@ function render() {
                     }
                 }
             }
-            measures[selectedNotes[0]["index"]].ties.push(
-                new VF.StaveTie({
-                    first_note: firstNote,
-                    last_note: secondNote,
-                    first_indices: [0],
-                    last_indices: [0]
-                })
-            );
+            if(!(areTied(firstNote, secondNote, selectedNotes[0]["index"]))[0]) {
+                measures[selectedNotes[0]["index"]].ties.push(
+                    new VF.StaveTie({
+                        first_note: firstNote,
+                        last_note: secondNote,
+                        first_indices: [0],
+                        last_indices: [0]
+                    })
+                );
+            }
+            else {
+                var index = areTied(firstNote, secondNote, selectedNotes[0]["index"])[1];
+                measures[selectedNotes[0]["index"]].ties.splice(index, 1);
+            }
             renderAndDraw();
 
         }
+    }
+
+    function areTied(firstNote, secondNote, index) {
+        for(var i in measures[index].ties)
+            if(measures[index].ties[i].first_note == firstNote && measures[index].ties[i].last_note == secondNote)
+                return [true, i];
+        return [false, null];
     }
 
     //TODO pass x and y from processClick
