@@ -11,6 +11,7 @@ function render() {
 
     var selectedNotes = [];
     var measures = [];
+    var tiesBetweenMeasures = {};
     var curIndex = 0;
     init();
 
@@ -136,47 +137,52 @@ function render() {
     }
 
     function tie() {
-        if (selectedNotes.length == 2 && selectedNotes[0]["index"] == selectedNotes[1]["index"] &&
+        if (selectedNotes.length == 2 &&
             selectedNotes[0]["note"].getKeys()[0] == selectedNotes[1]["note"].getKeys()[0] &&
             selectedNotes[0]["voiceName"] == selectedNotes[1]["voiceName"]) {
-            //sort the first and second selected note in selectedNotes
-            var firstNote, secondNote;
-            var foundFirst = false;
-            var notes = measures[selectedNotes[0]["index"]].notesArr[selectedNotes[0]["voiceName"]];
-            for (var i in notes) {
-                if (notes[i] == selectedNotes[0]["note"] || notes[i] == selectedNotes[1]["note"]) {
-                    if (foundFirst) {
-                        secondNote = notes[i];
-                        break;
-                    }
-                    else {
-                        firstNote = notes[i];
-                        foundFirst = true;
+            if (selectedNotes[0]["index"] == selectedNotes[1]["index"]) {
+                //sort the first and second selected note in selectedNotes
+                var firstNote, secondNote;
+                var foundFirst = false;
+                var notes = measures[selectedNotes[0]["index"]].notesArr[selectedNotes[0]["voiceName"]];
+                for (var i in notes) {
+                    if (notes[i] == selectedNotes[0]["note"] || notes[i] == selectedNotes[1]["note"]) {
+                        if (foundFirst) {
+                            secondNote = notes[i];
+                            break;
+                        }
+                        else {
+                            firstNote = notes[i];
+                            foundFirst = true;
+                        }
                     }
                 }
+                if (!(areTied(firstNote, secondNote, selectedNotes[0]["index"]))[0]) {
+                    measures[selectedNotes[0]["index"]].ties.push(
+                        new VF.StaveTie({
+                            first_note: firstNote,
+                            last_note: secondNote,
+                            first_indices: [0],
+                            last_indices: [0]
+                        })
+                    );
+                }
+                else {
+                    var index = areTied(firstNote, secondNote, selectedNotes[0]["index"])[1];
+                    measures[selectedNotes[0]["index"]].ties.splice(index, 1);
+                }
+                renderAndDraw();
             }
-            if(!(areTied(firstNote, secondNote, selectedNotes[0]["index"]))[0]) {
-                measures[selectedNotes[0]["index"]].ties.push(
-                    new VF.StaveTie({
-                        first_note: firstNote,
-                        last_note: secondNote,
-                        first_indices: [0],
-                        last_indices: [0]
-                    })
-                );
-            }
-            else {
-                var index = areTied(firstNote, secondNote, selectedNotes[0]["index"])[1];
-                measures[selectedNotes[0]["index"]].ties.splice(index, 1);
-            }
-            renderAndDraw();
+            else if (Math.abs(selectedNotes[0]["index"] - selectedNotes[1]["index"]) == 1) {
 
+            }
         }
+
     }
 
     function areTied(firstNote, secondNote, index) {
-        for(var i in measures[index].ties)
-            if(measures[index].ties[i].first_note == firstNote && measures[index].ties[i].last_note == secondNote)
+        for (var i in measures[index].ties)
+            if (measures[index].ties[i].first_note == firstNote && measures[index].ties[i].last_note == secondNote)
                 return [true, i];
         return [false, null];
     }
