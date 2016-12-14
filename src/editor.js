@@ -60,17 +60,6 @@ function render() {
                                     break loop;
                                 }
                             }
-                            /*if(Object.keys(selectedNotes[0]).length == 0) {
-                             selectedNotes[0] = {"note": foundNote, "voiceName": voiceName, "index": i};
-                             }
-                             else if(Object.keys(selectedNotes[1]).length == 0) {
-                             selectedNotes[1] = {"note": foundNote, "voiceName": voiceName, "index": i};
-                             }
-                             else {
-                             colorNote(selectedNotes[0]["note"], selectedNotes[0]["index"], selectedNotes[0]["voiceName"], "black");
-                             selectedNotes.shift();
-                             selectedNotes[1] = {"note": foundNote, "voiceName": voiceName, "index": i};
-                             }*/
                             selectedNotes.push({"note": foundNote, "voiceName": voiceName, "index": i});
                             colorNote(foundNote, i, voiceName, "red");
                             break loop;
@@ -147,14 +136,29 @@ function render() {
     }
 
     function tie() {
-        console.log(selectedNotes.length)
         if (selectedNotes.length == 2 && selectedNotes[0]["index"] == selectedNotes[1]["index"] &&
             selectedNotes[0]["note"].getKeys()[0] == selectedNotes[1]["note"].getKeys()[0] &&
             selectedNotes[0]["voiceName"] == selectedNotes[1]["voiceName"]) {
+            //sort the first and second selected note in selectedNotes
+            var firstNote, secondNote;
+            var foundFirst = false;
+            var notes = measures[selectedNotes[0]["index"]].notesArr[selectedNotes[0]["voiceName"]];
+            for (var i in notes) {
+                if (notes[i] == selectedNotes[0]["note"] || notes[i] == selectedNotes[1]["note"]) {
+                    if (foundFirst) {
+                        secondNote = notes[i];
+                        break;
+                    }
+                    else {
+                        firstNote = notes[i];
+                        foundFirst = true;
+                    }
+                }
+            }
             measures[selectedNotes[0]["index"]].ties.push(
                 new VF.StaveTie({
-                    first_note: selectedNotes[0]["note"],
-                    last_note: selectedNotes[1]["note"],
+                    first_note: firstNote,
+                    last_note: secondNote,
                     first_indices: [0],
                     last_indices: [0]
                 })

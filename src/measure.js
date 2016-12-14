@@ -39,6 +39,7 @@ Measure.prototype.getIndex = function () {
 //adds a note in the measure
 //in case adding the note creates an error, the voice is restored to the previous state
 Measure.prototype.addNote = function (note, voiceName, index) {
+    console.log(index)
     this.notesArr[voiceName].splice(index, 0, note);
     try {
         if (voiceName == "basso" || voiceName == "alto")
@@ -119,6 +120,7 @@ Measure.prototype.drawNotes = function () {
 }
 
 Measure.prototype.renderTies = function () {
+    console.log(this.ties.length)
     for (var i in this.ties) {
         var hasFirst = false;
         var hasLast = false;
@@ -128,15 +130,12 @@ Measure.prototype.renderTies = function () {
                 for (var j in this.notesArr[voiceName]) {
                     if (hasFirst)
                         cont++;
-                    if (this.notesArr[voiceName][j] == this.ties[i].first_note) {
+                    if (this.notesArr[voiceName][j] === this.ties[i].first_note)
                         hasFirst = true;
-                    }
-                    if (this.notesArr[voiceName][j] == this.ties[i].last_note) {
+                    if (this.notesArr[voiceName][j] === this.ties[i].last_note) {
                         hasLast = true;
-                        if (!hasFirst || cont > 1) {
-                            console.log('hi')
+                        if (!hasFirst || cont > 1)
                             this.ties.splice(Number(i), 1);
-                        }
                         break loop;
                     }
                 }
