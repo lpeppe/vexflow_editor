@@ -264,9 +264,12 @@ function render() {
     }
 
     function checkTiesBetweenMeasures() {
-        for (var i in tiesBetweenMeasures) {
-            if (!measures[tiesBetweenMeasures[i][1]].isComplete(tiesBetweenMeasures[i][2]) || !measures[tiesBetweenMeasures[i][1]].isLastNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].first_note) || !measures[tiesBetweenMeasures[i][1] + 1].isFirstNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].last_note)) {
+        for(var i = 0; i < tiesBetweenMeasures.length; i++) {
+            if (!measures[tiesBetweenMeasures[i][1]].isComplete(tiesBetweenMeasures[i][2])
+                || !measures[tiesBetweenMeasures[i][1]].isLastNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].first_note)
+                || !measures[tiesBetweenMeasures[i][1] + 1].isFirstNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].last_note)) {
                 tiesBetweenMeasures.splice(Number(i), 1);
+                i--;
             }
         }
     }

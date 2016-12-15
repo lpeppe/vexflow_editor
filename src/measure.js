@@ -97,17 +97,17 @@ Measure.prototype.computeScale = function () {
 //check if the given voice is full or not
 Measure.prototype.isComplete = function (voiceName) {
     /*this.restoreVoices();
-    return this.voices[voiceName].isComplete();*/
-    for(var i in this.voices[voiceName].getTickables())
-        if(this.voices[voiceName].getTickables()[i] instanceof VF.GhostNote)
+     return this.voices[voiceName].isComplete();*/
+    for (var i in this.voices[voiceName].getTickables())
+        if (this.voices[voiceName].getTickables()[i] instanceof VF.GhostNote)
             return false;
     return this.voices[voiceName].isComplete();
 }
 
 Measure.prototype.isFirstNote = function (voiceName, note) {
     var cont = 0;
-    for(var i in this.notesArr[voiceName]) {
-        if(this.notesArr[voiceName][i] == note)
+    for (var i in this.notesArr[voiceName]) {
+        if (this.notesArr[voiceName][i] == note)
             return cont == 0;
         cont++;
     }
@@ -115,9 +115,9 @@ Measure.prototype.isFirstNote = function (voiceName, note) {
 
 Measure.prototype.isLastNote = function (voiceName, note) {
     var cont = 0;
-    for(var i in this.notesArr[voiceName]) {
+    for (var i in this.notesArr[voiceName]) {
         cont++;
-        if(this.notesArr[voiceName][i] == note)
+        if (this.notesArr[voiceName][i] == note)
             return cont == this.notesArr[voiceName].length;
     }
 }
@@ -141,7 +141,8 @@ Measure.prototype.drawNotes = function () {
 }
 
 Measure.prototype.renderTies = function () {
-    for (var i in this.ties) {
+    for (var i = 0; i < this.ties.length; i++) {
+        console.log(i)
         var hasFirst = false;
         var hasLast = false;
         var cont = 0;
@@ -154,14 +155,18 @@ Measure.prototype.renderTies = function () {
                         hasFirst = true;
                     if (this.notesArr[voiceName][j] === this.ties[i].last_note) {
                         hasLast = true;
-                        if (!hasFirst || cont > 1)
+                        if (!hasFirst || cont > 1) {
                             this.ties.splice(Number(i), 1);
+                            i--;
+                        }
                         break loop;
                     }
                 }
             }
-        if (!hasLast || !hasFirst)
+        if (!hasLast || !hasFirst) {
             this.ties.splice(Number(i), 1);
+            i--;
+        }
     }
     this.ties.forEach(function (t) {
         t.setContext(ctx).draw()
