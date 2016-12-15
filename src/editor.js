@@ -11,7 +11,7 @@ function render() {
 
     var selectedNotes = [];
     var measures = [];
-    var tiesBetweenMeasures = {};
+    var tiesBetweenMeasures = [];
     var curIndex = 0;
     init();
 
@@ -157,7 +157,7 @@ function render() {
                         }
                     }
                 }
-                if (!(areTied(firstNote, secondNote, selectedNotes[0]["index"]))[0]) {
+                if (!(areTied(firstNote, secondNote, selectedNotes[0]["index"], true))[0]) {
                     measures[selectedNotes[0]["index"]].ties.push(
                         new VF.StaveTie({
                             first_note: firstNote,
@@ -168,23 +168,60 @@ function render() {
                     );
                 }
                 else {
-                    var index = areTied(firstNote, secondNote, selectedNotes[0]["index"])[1];
+                    var index = areTied(firstNote, secondNote, selectedNotes[0]["index"], true)[1];
                     measures[selectedNotes[0]["index"]].ties.splice(index, 1);
                 }
                 renderAndDraw();
-            }
+            } //if the selected notes belong to adjacent measures
             else if (Math.abs(selectedNotes[0]["index"] - selectedNotes[1]["index"]) == 1) {
-
+                var firstNote, secondNote, i;
+                if (selectedNotes[0]["index"] < selectedNotes[1]["index"]) {
+                    firstNote = selectedNotes[0]["note"];
+                    secondNote = selectedNotes[1]["note"];
+                    i = selectedNotes[0]["index"]
+                }
+                else {
+                    firstNote = selectedNotes[1]["note"];
+                    secondNote = selectedNotes[0]["note"];
+                    i = selectedNotes[1]["index"];
+                }
+                if (measures[i].isComplete(selectedNotes[0]["voiceName"]) &&
+                    measures[i].isLastNote(selectedNotes[0]["voiceName"], firstNote) &&
+                    measures[i + 1].isFirstNote(selectedNotes[0]["voiceName"], secondNote)) {
+                    if (!(areTied(firstNote, secondNote, i, false))[0]) {
+                        tiesBetweenMeasures.push([new VF.StaveTie({
+                            first_note: firstNote,
+                            last_note: secondNote,
+                            first_indices: [0],
+                            last_indices: [0]
+                        }), i, selectedNotes[0]["voiceName"]
+                        ]);
+                    }
+                    else {
+                        var index = areTied(firstNote, secondNote, i, false)[1];
+                        tiesBetweenMeasures.splice(index, 1);
+                    }
+                    renderAndDraw();
+                }
             }
         }
 
     }
 
-    function areTied(firstNote, secondNote, index) {
-        for (var i in measures[index].ties)
-            if (measures[index].ties[i].first_note == firstNote && measures[index].ties[i].last_note == secondNote)
-                return [true, i];
-        return [false, null];
+    //the sameMeasure variable is set to true when firstNote and secondNote belong to the same measure
+    function areTied(firstNote, secondNote, index, sameMeasure) {
+        if (sameMeasure) {
+            for (var i in measures[index].ties)
+                if (measures[index].ties[i].first_note == firstNote && measures[index].ties[i].last_note == secondNote)
+                    return [true, i];
+            return [false, null];
+        }
+        else {
+            for (var i in tiesBetweenMeasures)
+                if (tiesBetweenMeasures[i][0].first_note == firstNote && tiesBetweenMeasures[i][0].last_note == secondNote)
+                    return [true, i];
+            return [false, null];
+        }
     }
 
     //TODO pass x and y from processClick
@@ -219,6 +256,18 @@ function render() {
         for (var i = 0; i < measures.length; i++) {
             measures[i].drawNotes();
             measures[i].renderTies();
+        }
+        checkTiesBetweenMeasures();
+        tiesBetweenMeasures.forEach(function (t) {
+            t[0].setContext(ctx).draw()
+        });
+    }
+
+    function checkTiesBetweenMeasures() {
+        for (var i in tiesBetweenMeasures) {
+            if (!measures[tiesBetweenMeasures[i][1]].isComplete(tiesBetweenMeasures[i][2]) || !measures[tiesBetweenMeasures[i][1]].isLastNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].first_note) || !measures[tiesBetweenMeasures[i][1] + 1].isFirstNote(tiesBetweenMeasures[i][2], tiesBetweenMeasures[i][0].last_note)) {
+                tiesBetweenMeasures.splice(Number(i), 1);
+            }
         }
     }
 

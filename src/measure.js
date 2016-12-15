@@ -96,8 +96,30 @@ Measure.prototype.computeScale = function () {
 
 //check if the given voice is full or not
 Measure.prototype.isComplete = function (voiceName) {
-    this.restoreVoices();
+    /*this.restoreVoices();
+    return this.voices[voiceName].isComplete();*/
+    for(var i in this.voices[voiceName].getTickables())
+        if(this.voices[voiceName].getTickables()[i] instanceof VF.GhostNote)
+            return false;
     return this.voices[voiceName].isComplete();
+}
+
+Measure.prototype.isFirstNote = function (voiceName, note) {
+    var cont = 0;
+    for(var i in this.notesArr[voiceName]) {
+        if(this.notesArr[voiceName][i] == note)
+            return cont == 0;
+        cont++;
+    }
+}
+
+Measure.prototype.isLastNote = function (voiceName, note) {
+    var cont = 0;
+    for(var i in this.notesArr[voiceName]) {
+        cont++;
+        if(this.notesArr[voiceName][i] == note)
+            return cont == this.notesArr[voiceName].length;
+    }
 }
 
 Measure.prototype.getEndX = function () {
