@@ -160,7 +160,7 @@ Measure.prototype.renderTies = function () {
                     }
                 }
             }
-        if (!hasLast)
+        if (!hasLast || !hasFirst)
             this.ties.splice(Number(i), 1);
     }
     this.ties.forEach(function (t) {
