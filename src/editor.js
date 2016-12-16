@@ -1,6 +1,8 @@
 function render() {
     VF = Vex.Flow;
     canvas = document.getElementById("score");
+    scoreDiv = document.getElementById("scoreDiv");
+    vmCanvas = document.getElementById("vmCanvas");
     renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     ctx = renderer.getContext();
     timeSign = getRadioSelected("time");
@@ -8,11 +10,28 @@ function render() {
     beatValue = timeSign.split("/")[1];
     document.getElementById("del").addEventListener("click", delNotes, false);
     document.getElementById("tie").addEventListener("click", tie, false);
-
+    document.getElementById("visualMelody").addEventListener("click", vmResize, false);
     var selectedNotes = [];
     var measures = [];
+    measures.observers = [];
+    measures.subscribe = function (callBack) {
+        measures.observers.push(callBack);
+    }
+    measures.unsubscribe = function (callBack) {
+        for(var i = 0; i < measure.observers.length; i++) {
+            if(measure.observers[i] == callBack) {
+                measure.observers.splice(i, 1);
+                return;
+            }
+        }
+    }
+    measures.notify = function() {
+        for(var i in measures.observers)
+            measures.observers[i].update();
+    }
     var tiesBetweenMeasures = [];
     var curIndex = 0;
+    vmRenderer = new vmRenderer(measures);
     init();
 
     function init() {
@@ -29,13 +48,14 @@ function render() {
         var size = 0;
         for (var i = 0; i < measures.length; i++)
             size += measures[i].width;
-        renderer.resize(size + 1500, 600);
+        renderer.resize(size + 1500, 250);
         for (var i = 0; i < measures.length; i++) {
             if (i == 0)
                 measures[i].render(10);
             else
                 measures[i].render(measures[i - 1].getEndX());
         }
+        measures.notify();
     }
 
     function processClick(e) {
@@ -204,6 +224,18 @@ function render() {
                     renderAndDraw();
                 }
             }
+        }
+
+    }
+
+    function vmResize() {
+        if(scoreDiv.style.height == "270px") {
+            scoreDiv.style.height = "400px";
+            vmCanvas.style.display = "block";
+        }
+        else {
+            scoreDiv.style.height = "270px";
+            vmCanvas.style.display = "none";
         }
 
     }

@@ -142,7 +142,6 @@ Measure.prototype.drawNotes = function () {
 
 Measure.prototype.renderTies = function () {
     for (var i = 0; i < this.ties.length; i++) {
-        console.log(i)
         var hasFirst = false;
         var hasLast = false;
         var cont = 0;
