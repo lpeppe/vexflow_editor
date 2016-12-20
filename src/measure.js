@@ -7,6 +7,8 @@ function Measure(index) {
         "soprano": [],
         "alto": []
     };
+    /*setMode(3) allows to insert notes inside the measure even if the measure is not complete, but
+    throws an exception if the duration of the inserted notes exceeds the time signature*/
     this.voices = {
         "basso": new VF.Voice({
             num_beats: beatNum, beat_value: beatValue,
@@ -25,6 +27,7 @@ function Measure(index) {
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3)
     };
+    //array of ties inside the measure
     this.ties = [];
     this.formatter = new VF.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
@@ -36,8 +39,9 @@ Measure.prototype.getIndex = function () {
     return this.index;
 }
 
-//adds a note in the measure
-//in case adding the note creates an error, the voice is restored to the previous state
+/*adds a note in the measure
+in case adding the note generates an error (the new inserted note exceeds the time signature),
+the voice is restored to the previous state*/
 Measure.prototype.addNote = function (note, voiceName, index) {
     this.notesArr[voiceName].splice(index, 0, note);
     try {
@@ -80,7 +84,7 @@ Measure.prototype.render = function (x) {
     this.bassStave.setContext(ctx).draw();
 }
 
-//scale is used to format notes in the measure
+//calculate the width of the stave based on the note with the minimum duration
 Measure.prototype.computeScale = function () {
     this.restoreVoices();
     var notes = {"w": 1, "h": 2, "q": 4, "8": 8, "16": 16, "wr": 1, "hr": 2, "qr": 4, "8r": 8, "16r": 16};
@@ -104,6 +108,7 @@ Measure.prototype.isComplete = function (voiceName) {
     return this.voices[voiceName].isComplete();
 }
 
+//check if the note is the first of the stave(used for tiesBetweenMeasures)
 Measure.prototype.isFirstNote = function (voiceName, note) {
     var cont = 0;
     for (var i in this.notesArr[voiceName]) {
@@ -113,6 +118,7 @@ Measure.prototype.isFirstNote = function (voiceName, note) {
     }
 }
 
+//check if the note is the last of the stave (used for tiesBetweenMeasures)
 Measure.prototype.isLastNote = function (voiceName, note) {
     var cont = 0;
     for (var i in this.notesArr[voiceName]) {
@@ -126,6 +132,7 @@ Measure.prototype.getEndX = function () {
     return this.trebleStave.getX() + this.trebleStave.getWidth();
 }
 
+//draw the notes on the staves
 Measure.prototype.drawNotes = function () {
     this.completeVoices();
     var toFormat = [];
@@ -140,6 +147,7 @@ Measure.prototype.drawNotes = function () {
     }
 }
 
+//render the ties inside the measure
 Measure.prototype.renderTies = function () {
     for (var i = 0; i < this.ties.length; i++) {
         var hasFirst = false;
@@ -185,12 +193,14 @@ Measure.prototype.getWidth = function () {
     return this.trebleStave.getWidth();
 }
 
+//add ghostNotes to the voice until it's complete (allows proper formatting)
 Measure.prototype.completeVoices = function () {
     for (var voice in this.voices)
         while (!this.voices[voice].isComplete())
             this.voices[voice].addTickable(new Vex.Flow.GhostNote({clef: "bass", keys: ["e/2"], duration: "16"}));
 }
 
+//remove ghostNotes from the voices
 Measure.prototype.restoreVoices = function () {
     for (var voice in this.voices) {
         this.voices[voice] = new VF.Voice({
@@ -201,6 +211,7 @@ Measure.prototype.restoreVoices = function () {
     }
 }
 
+//check if the measure is empty
 Measure.prototype.isEmpty = function () {
     for (var voiceName in this.notesArr)
         if (this.notesArr[voiceName].length > 0)

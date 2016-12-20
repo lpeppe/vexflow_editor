@@ -13,7 +13,7 @@ function render() {
     document.getElementById("visualMelody").addEventListener("click", vmResize, false);
     var selectedNotes = [];
     var measures = [];
-    measures.observers = [];
+    measures.observers = []; //a list of the observers
     measures.subscribe = function (callBack) {
         measures.observers.push(callBack);
     }
@@ -25,11 +25,11 @@ function render() {
             }
         }
     }
-    measures.notify = function() {
+    measures.notify = function() { //gets called whenever a change occurs on the measures and notifies the observers
         for(var i in measures.observers)
             measures.observers[i].update();
     }
-    var tiesBetweenMeasures = [];
+    var tiesBetweenMeasures = []; //array of ties that connect notes belonging to different staves
     var curIndex = 0;
     vmRenderer = new vmRenderer(measures);
     init();
@@ -55,7 +55,7 @@ function render() {
             else
                 measures[i].render(measures[i - 1].getEndX());
         }
-        measures.notify();
+        measures.notify(); //notify the observers that the measures array has changed
     }
 
     function processClick(e) {
@@ -63,7 +63,7 @@ function render() {
         var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
         var i = getMeasureIndex(x);
-        var found = false;
+        var found = false; //set to true if a note is clicked
         if (measures[i].isEmpty())
             addNote(e);
         else {
@@ -72,21 +72,25 @@ function render() {
                     for (var note in measures[i].voices[voiceName].getTickables()) {
                         if (measures[i].voices[voiceName].getTickables()[note] instanceof VF.StaveNote &&
                             isSelected(measures[i].voices[voiceName].getTickables()[note], x, y, voiceName)) {
-                            found = true;
+                            found = true; //the user clicked on a note
                             var foundNote = measures[i].voices[voiceName].getTickables()[note];
                             for (var n in selectedNotes) {
                                 if (foundNote == selectedNotes[n]["note"]) {
+                                    //if the note was already selected, color it black and
+                                    //remove from the selected notes array
                                     colorNote(foundNote, i, voiceName, "black");
                                     selectedNotes.splice(Number(n), 1);
                                     break loop;
                                 }
                             }
+                            //if the note was not selected color it red and add it to the selected notes array
                             selectedNotes.push({"note": foundNote, "voiceName": voiceName, "index": i});
                             colorNote(foundNote, i, voiceName, "red");
                             break loop;
                         }
                     }
                 }
+                //if the user didn't click on a note, add a new one
             if (!found)
                 addNote(e);
         }
@@ -131,6 +135,7 @@ function render() {
                 return i;
     }
 
+    //return the index of the new note
     function calcNoteIndex(index, voiceName, x) {
         var notes = measures[index].voices[voiceName].getTickables();
         var tmp = [];
@@ -144,6 +149,7 @@ function render() {
         return i++;
     }
 
+    //delete the selected notes
     function delNotes() {
         for (var i in selectedNotes) {
             var notes = measures[selectedNotes[i]["index"]].notesArr[selectedNotes[i]["voiceName"]];
@@ -152,6 +158,7 @@ function render() {
                     notes.splice(Number(j), 1);
             measures[selectedNotes[i]["index"]].minNote = 1; //reset the min note to resize the measure properly
         }
+        //after deleting empty the selectedNotes array
         selectedNotes.splice(0, selectedNotes.length)
         renderAndDraw();
     }
@@ -160,8 +167,8 @@ function render() {
         if (selectedNotes.length == 2 &&
             selectedNotes[0]["note"].getKeys()[0] == selectedNotes[1]["note"].getKeys()[0] &&
             selectedNotes[0]["voiceName"] == selectedNotes[1]["voiceName"]) {
-            if (selectedNotes[0]["index"] == selectedNotes[1]["index"]) {
-                //sort the first and second selected note in selectedNotes
+            if (selectedNotes[0]["index"] == selectedNotes[1]["index"]) { //if the notes belong to the same stave
+                //sort the first and second selected notes in selectedNotes
                 var firstNote, secondNote;
                 var foundFirst = false;
                 var notes = measures[selectedNotes[0]["index"]].notesArr[selectedNotes[0]["voiceName"]];
@@ -177,7 +184,7 @@ function render() {
                         }
                     }
                 }
-                if (!(areTied(firstNote, secondNote, selectedNotes[0]["index"], true))[0]) {
+                if (!(areTied(firstNote, secondNote, selectedNotes[0]["index"], true))[0]) { //if the notes aren't tied yet
                     measures[selectedNotes[0]["index"]].ties.push(
                         new VF.StaveTie({
                             first_note: firstNote,
@@ -187,7 +194,7 @@ function render() {
                         })
                     );
                 }
-                else {
+                else { //otherwise remove the tie
                     var index = areTied(firstNote, secondNote, selectedNotes[0]["index"], true)[1];
                     measures[selectedNotes[0]["index"]].ties.splice(index, 1);
                 }
@@ -205,6 +212,9 @@ function render() {
                     secondNote = selectedNotes[0]["note"];
                     i = selectedNotes[1]["index"];
                 }
+                /*ties can be added only if the first stave is complete,
+                the first note is the last note of the first stave and the
+                second note is the first of the second stave*/
                 if (measures[i].isComplete(selectedNotes[0]["voiceName"]) &&
                     measures[i].isLastNote(selectedNotes[0]["voiceName"], firstNote) &&
                     measures[i + 1].isFirstNote(selectedNotes[0]["voiceName"], secondNote)) {
@@ -228,6 +238,7 @@ function render() {
 
     }
 
+    //TODO move to visual-melody.js
     function vmResize() {
         if(scoreDiv.style.height == "270px") {
             scoreDiv.style.height = "400px";
@@ -241,6 +252,7 @@ function render() {
     }
 
     //the sameMeasure variable is set to true when firstNote and secondNote belong to the same measure
+    //return an array containing a boolean value and the index of the tie inside the ties array, if the tie exists.
     function areTied(firstNote, secondNote, index, sameMeasure) {
         if (sameMeasure) {
             for (var i in measures[index].ties)
@@ -277,6 +289,7 @@ function render() {
             var pos = calcNoteIndex(i, voice, e.clientX - canvas.getBoundingClientRect().left);
             measures[i].addNote(newNote, voice, pos);
         }
+        //add new measures
         if (i >= measures.length - 2)
             measures.push(new Measure(i + 2));
         renderAndDraw();
@@ -295,6 +308,7 @@ function render() {
         });
     }
 
+    //remove the ties that aren't valid anymore
     function checkTiesBetweenMeasures() {
         for(var i = 0; i < tiesBetweenMeasures.length; i++) {
             if (!measures[tiesBetweenMeasures[i][1]].isComplete(tiesBetweenMeasures[i][2])
@@ -306,7 +320,7 @@ function render() {
         }
     }
 
-    //calculate the pitch based on the mouse click position
+    //calculate the pitch based on the mouse y position
     function calculatePitch(e, tone) {
         var rect = canvas.getBoundingClientRect();
         var y = e.clientY - rect.top;
