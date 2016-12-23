@@ -1,5 +1,6 @@
 function vmRenderer(measures) {
     this.ctx = vmCanvas.getContext("2d");
+    vmCanvas.addEventListener("click", test, false)
     this.drawVoiceNames();
     this.measures = measures;
     this.trajectories = {
@@ -40,9 +41,22 @@ vmRenderer.prototype.createTrajectories = function(){
     for(var i in this.measures) {
         for(var voiceName in this.measures[i].voices) {
             if(this.measures[i].notesArr[voiceName].length >= 2) {
-                var count = 0;
-                for(var note in this.measures[i].voices[voiceName]) {
-
+                var count = 0, firstX, firstY;
+                var notes = this.measures[i].voices[voiceName].getTickables();
+                for(var j in notes) {
+                    if(notes[j] instanceof VF.GhostNote)
+                        break;
+                    if(count == 0) {
+                        firstX = notes[j].getBoundingBox().getX();
+                        firstY = notes[j].getBoundingBox().getY() - 150;
+                        count++;
+                    }
+                    else {
+                        this.trajectories[voiceName].push(new segment(firstX, firstY,
+                            notes[j].getBoundingBox().getX(), notes[j].getBoundingBox().getY() - 150));
+                        firstX = notes[j].getBoundingBox().getX();
+                        firstY = notes[j].getBoundingBox().getY() - 150;
+                    }
                 }
             }
         }
@@ -50,10 +64,19 @@ vmRenderer.prototype.createTrajectories = function(){
 }
 
 vmRenderer.prototype.update = function () {
-    //this.ctx.clearRect(0, 0, vmCanvas.width, vmCanvas.height);
+    this.ctx.clearRect(0, 0, vmCanvas.width, vmCanvas.height);
     vmCanvas.width = canvas.width;
     this.drawVoiceNames();
     this.drawMeasureLines();
+    this.ctx.setLineDash([5, 0]);
+    this.createTrajectories();
+    this.drawTrajectories();
+}
+
+vmRenderer.prototype.drawTrajectories = function () {
+    for(var voiceName in this.trajectories) {
+        this.trajectories[voiceName].draw();
+    }
 }
 
 function segment(startX, startY, endX, endY) {
@@ -70,7 +93,7 @@ segment.prototype.draw = function () {
     vmRenderer.ctx.stroke();
 }
 
-segment.prototype.isIntersecting = function (otherSegment) {
+/*segment.prototype.isIntersecting = function (otherSegment) {
     var x=((this.startX*this.endY-this.startY*this.endX)*(otherSegment.startX-otherSegment.endX)-(this.startX-this.endX)*(otherSegment.startX*otherSegment.endY-otherSegment.startY*otherSegment.endX)) /
         ((this.startX-this.endX)*(otherSegment.startY-otherSegment.endY)-(this.startY-this.endY)*(otherSegment.startX-otherSegment.endX));
     var y=((this.startX*this.endY-this.startY*this.endX)*(otherSegment.startY-otherSegment.endY)-(this.startY-this.endY)*(otherSegment.startX*otherSegment.endY-otherSegment.startY*otherSegment.endX)) /
@@ -100,6 +123,19 @@ segment.prototype.isIntersecting = function (otherSegment) {
         }
     }
     return true;
+}*/
+
+segment.prototype.calcIntersection = function (otherSegment) {
+    var m1 = (this.startY - this.endY) / (this.startX - this.endX);  // slope of line 1
+    var m2= (otherSegment.startY - otherSegment.endY) / (otherSegment.startX - otherSegment.endX);  // slope of line 2
+    if(m1 - m2 >= Number.EPSILON) {
+        var x = (m1 * this.startX - m2*otherSegment.startX + otherSegment.startY - this.startY) / (m1 - m2);
+        var y = (m1*m2*(otherSegment.startX-this.startX) + m2*this.startY - m1*otherSegment.startY) / (m2 - m1);
+        if(Math.min(this.startX, otherSegment.startX) >= x &&
+        Math.max(this.endX, otherSegment.endX) <= x)
+            return [x, y];
+    }
+    return undefined;
 }
 
 function trajectory() {
@@ -118,4 +154,16 @@ trajectory.prototype.getSegmentsBetween = function (x1, x2) {
 
 trajectory.prototype.push = function(segment){
     this.segments.push(segment);
+}
+
+trajectory.prototype.draw = function () {
+    for(var i in this.segments)
+        this.segments[i].draw();
+}
+
+function test(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var y = e.clientY - rect.top;
+    console.log("vm canvas: " + x+ " " + y)
 }

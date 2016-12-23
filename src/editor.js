@@ -40,6 +40,7 @@ function render() {
         measures.push(new Measure(2));
         measures.push(new Measure(3));
         renderMeasures();
+        measures.notify(); //notify the observers that the measures array has changed
         canvas.addEventListener("click", processClick, false);
     }
 
@@ -55,13 +56,13 @@ function render() {
             else
                 measures[i].render(measures[i - 1].getEndX());
         }
-        measures.notify(); //notify the observers that the measures array has changed
     }
 
     function processClick(e) {
         var rect = canvas.getBoundingClientRect();
         var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
+        console.log("score canvas: " + x+ " " + y)
         var i = getMeasureIndex(x);
         var found = false; //set to true if a note is clicked
         if (measures[i].isEmpty())
@@ -306,6 +307,7 @@ function render() {
         tiesBetweenMeasures.forEach(function (t) {
             t[0].setContext(ctx).draw()
         });
+        measures.notify(); //notify the observers that the measures array has changed
     }
 
     //remove the ties that aren't valid anymore
