@@ -62,7 +62,6 @@ function render() {
         var rect = canvas.getBoundingClientRect();
         var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
-        console.log("score canvas: " + x+ " " + y)
         var i = getMeasureIndex(x);
         var found = false; //set to true if a note is clicked
         if (measures[i].isEmpty())
