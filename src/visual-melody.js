@@ -44,6 +44,8 @@ vmRenderer.prototype.createTrajectories = function () {
             for (var j in notes) {
                 if (notes[j] instanceof VF.GhostNote)
                     break;
+                if(notes[j].isRest())
+                    continue;
                 if (count == 0) {
                     var k = i - 1;
                     if(i > 0 && this.measures[k].isComplete(voiceName)) {
@@ -88,6 +90,10 @@ vmRenderer.prototype.drawTrajectories = function () {
         this.trajectories[voiceName].draw();
 }
 
+vmRenderer.prototype.calcIntersections = function () {
+
+}
+
 function segment(startX, startY, endX, endY) {
     this.startX = startX;
     this.startY = startY;
@@ -101,7 +107,6 @@ vmRenderer.prototype.getCanvasPosition = function (y, voiceName) {
         y+=40;
     if(voiceName == "tenore" || voiceName == "soprano")
         y+=30;
-    //return (((y-145)/60)*62.5)+62.5;
     return ((y-55)/180)*125;
 }
 
