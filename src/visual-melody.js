@@ -48,10 +48,10 @@ vmRenderer.prototype.createTrajectories = function () {
                     continue;
                 if (count == 0) {
                     var k = i - 1;
-                    if(i > 0 && this.measures[k].isComplete(voiceName)) {
-                        var prevNotes = this.measures[k].voices[voiceName].getTickables();
-                        firstX = prevNotes[prevNotes.length - 1].getBoundingBox().getX();
-                        firstY = this.getCanvasPosition(prevNotes[prevNotes.length - 1].getBoundingBox().getY(), voiceName);
+                    var last;
+                    if(i > 0 && (last = this.findLastNote(k, voiceName))[0]) {
+                        firstX = last[1].getBoundingBox().getX();
+                        firstY = this.getCanvasPosition(last[1].getBoundingBox().getY(), voiceName);
                         this.trajectories[voiceName].push(new segment(firstX, firstY,
                             notes[j].getBoundingBox().getX(), this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName)));
                         firstX = notes[j].getBoundingBox().getX();
@@ -73,6 +73,19 @@ vmRenderer.prototype.createTrajectories = function () {
             }
         }
     }
+}
+
+//find the last note of the measure that is not a rest
+vmRenderer.prototype.findLastNote = function (k, voiceName) {
+    for(; k >= 0; k--) {
+        if(!this.measures[k].isComplete(voiceName))
+            return [false];
+        var notes = this.measures[k].voices[voiceName].getTickables();
+        for(var i = notes.length - 1; i >= 0; i--)
+            if(!notes[i].isRest())
+                return [true, notes[i], k];
+    }
+    return [false];
 }
 
 vmRenderer.prototype.update = function () {
