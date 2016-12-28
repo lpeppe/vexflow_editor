@@ -32,10 +32,10 @@ vmRenderer.prototype.drawMeasureLines = function () {
 
 vmRenderer.prototype.createTrajectories = function () {
     this.trajectories = {
-        "basso": new trajectory(),
-        "tenore": new trajectory(),
-        "alto": new trajectory(),
-        "soprano": new trajectory()
+        "basso": new trajectory("basso"),
+        "tenore": new trajectory("tenore"),
+        "alto": new trajectory("alto"),
+        "soprano": new trajectory("soprano")
     };
     for (var i in this.measures) {
         for (var voiceName in this.measures[i].voices) {
@@ -96,6 +96,7 @@ vmRenderer.prototype.update = function () {
     this.ctx.setLineDash([5, 0]);
     this.createTrajectories();
     this.drawTrajectories();
+    this.calcIntersections();
 }
 
 vmRenderer.prototype.drawTrajectories = function () {
@@ -104,15 +105,23 @@ vmRenderer.prototype.drawTrajectories = function () {
 }
 
 vmRenderer.prototype.calcIntersections = function () {
-
+    this.calcIntersectionsBetweenVoices("basso", "tenore");
+    this.calcIntersectionsBetweenVoices("basso", "alto");
+    this.calcIntersectionsBetweenVoices("tenore", "alto");
+    this.calcIntersectionsBetweenVoices("tenore", "soprano");
+    this.calcIntersectionsBetweenVoices("alto", "soprano");
 }
 
-function segment(startX, startY, endX, endY) {
-    this.startX = startX;
-    this.startY = startY;
-    this.endX = endX;
-    this.endY = endY;
-    //this.m = (this.endY - this.startY)/(this.endX - this.startX);
+vmRenderer.prototype.calcIntersectionsBetweenVoices = function (firstVoice, secondVoice) {
+    for(var i in this.trajectories[firstVoice].segments) {
+        var firstSegment = this.trajectories[firstVoice].segments[i];
+        var segments = this.trajectories[secondVoice].getSegmentsBetween(firstSegment.startX, firstSegment.endX);
+        for(var j in segments) {
+            var intersection = firstSegment.calcIntersection(segments[j]);
+            if(intersection.onLine1 && intersection.onLine2)
+                this.drawIntersection(firstSegment, segments[j], intersection.x, intersection.y)
+        }
+    }
 }
 
 vmRenderer.prototype.getCanvasPosition = function (y, voiceName) {
@@ -123,6 +132,21 @@ vmRenderer.prototype.getCanvasPosition = function (y, voiceName) {
     return ((y-55)/180)*125;
 }
 
+vmRenderer.prototype.drawIntersection = function (firstSegment, secondSegment, x, y) {
+    this.ctx.fillStyle = 'red';
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, 5, 0, 2*Math.PI);
+    this.ctx.fill();
+
+}
+
+function segment(startX, startY, endX, endY) {
+    this.startX = startX;
+    this.startY = startY;
+    this.endX = endX;
+    this.endY = endY;
+}
+
 segment.prototype.draw = function () {
     vmRenderer.ctx.beginPath();
     vmRenderer.ctx.moveTo(this.startX, this.startY);
@@ -130,60 +154,44 @@ segment.prototype.draw = function () {
     vmRenderer.ctx.stroke();
 }
 
-/*segment.prototype.isIntersecting = function (otherSegment) {
- var x=((this.startX*this.endY-this.startY*this.endX)*(otherSegment.startX-otherSegment.endX)-(this.startX-this.endX)*(otherSegment.startX*otherSegment.endY-otherSegment.startY*otherSegment.endX)) /
- ((this.startX-this.endX)*(otherSegment.startY-otherSegment.endY)-(this.startY-this.endY)*(otherSegment.startX-otherSegment.endX));
- var y=((this.startX*this.endY-this.startY*this.endX)*(otherSegment.startY-otherSegment.endY)-(this.startY-this.endY)*(otherSegment.startX*otherSegment.endY-otherSegment.startY*otherSegment.endX)) /
- ((this.startX-this.endX)*(otherSegment.startY-otherSegment.endY)-(this.startY-this.endY)*(otherSegment.startX-otherSegment.endX));
- if (isNaN(x)||isNaN(y)) {
- return false;
- } else {
- if (this.startX>=this.endX) {
- if (!(this.endX<=x&&x<=this.startX)) {return false;}
- } else {
- if (!(this.startX<=x&&x<=this.endX)) {return false;}
- }
- if (this.startY>=this.endY) {
- if (!(this.endY<=y&&y<=this.startY)) {return false;}
- } else {
- if (!(this.startY<=y&&y<=this.endY)) {return false;}
- }
- if (otherSegment.startX>=otherSegment.endX) {
- if (!(otherSegment.endX<=x&&x<=otherSegment.startX)) {return false;}
- } else {
- if (!(otherSegment.startX<=x&&x<=otherSegment.endX)) {return false;}
- }
- if (otherSegment.startY>=otherSegment.endY) {
- if (!(otherSegment.endY<=y&&y<=otherSegment.startY)) {return false;}
- } else {
- if (!(otherSegment.startY<=y&&y<=otherSegment.endY)) {return false;}
- }
- }
- return true;
- }*/
-
 segment.prototype.calcIntersection = function (otherSegment) {
-    var m1 = (this.startY - this.endY) / (this.startX - this.endX);  // slope of line 1
-    var m2 = (otherSegment.startY - otherSegment.endY) / (otherSegment.startX - otherSegment.endX);  // slope of line 2
-    if (m1 - m2 >= Number.EPSILON) {
-        var x = (m1 * this.startX - m2 * otherSegment.startX + otherSegment.startY - this.startY) / (m1 - m2);
-        var y = (m1 * m2 * (otherSegment.startX - this.startX) + m2 * this.startY - m1 * otherSegment.startY) / (m2 - m1);
-        if (Math.min(this.startX, otherSegment.startX) >= x &&
-            Math.max(this.endX, otherSegment.endX) <= x)
-            return [x, y];
-    }
-    return undefined;
+    var denominator, a, b, numerator1, numerator2, result = {
+        x: null,
+        y: null,
+        onLine1: false,
+        onLine2: false
+    };
+    denominator = ((otherSegment.endY - otherSegment.startY) * (this.endX - this.startX)) - ((otherSegment.endX - otherSegment.startX) * (this.endY - this.startY));
+    if (denominator == 0)
+        return result;
+    a = this.startY - otherSegment.startY;
+    b = this.startX - otherSegment.startX;
+    numerator1 = ((otherSegment.endX - otherSegment.startX) * a) - ((otherSegment.endY - otherSegment.startY) * b);
+    numerator2 = ((this.endX - this.startX) * a) - ((this.endY - this.startY) * b);
+    a = numerator1 / denominator;
+    b = numerator2 / denominator;
+    result.x = this.startX + (a * (this.endX - this.startX));
+    result.y = this.startY + (a * (this.endY - this.startY));
+    if (a > 0 && a < 1)
+        result.onLine1 = true;
+    if (b > 0 && b < 1)
+        result.onLine2 = true;
+    //the segments intersect if both are true
+    return result;
 }
 
-function trajectory() {
+function trajectory(voiceName) {
     this.segments = [];
+    this.voiceName = voiceName;
 }
 
 trajectory.prototype.getSegmentsBetween = function (x1, x2) {
     var toReturn = [];
     for (var i in this.segments) {
-        if (this.segments[i].endX < x1 || this.segments[i].startX > x2)
+        if (this.segments[i].endX <= x1)
             continue;
+        if(this.segments[i].startX >= x2)
+            break;
         toReturn.push(this.segments[i]);
     }
     return toReturn;
@@ -194,6 +202,22 @@ trajectory.prototype.push = function (segment) {
 }
 
 trajectory.prototype.draw = function () {
+    if(this.voiceName == "basso")
+        vmRenderer.ctx.fillStyle = "black";
+    switch(this.voiceName) {
+        case "basso":
+            vmRenderer.ctx.strokeStyle = "black";
+            break;
+        case "tenore":
+            vmRenderer.ctx.strokeStyle = "blue";
+            break;
+        case "alto":
+            vmRenderer.ctx.strokeStyle = "#ffc444";
+            break;
+        case "soprano":
+            vmRenderer.ctx.strokeStyle = "#019117";
+            break;
+    }
     for (var i in this.segments)
         this.segments[i].draw();
 }
