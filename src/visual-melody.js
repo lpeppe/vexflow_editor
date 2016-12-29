@@ -132,13 +132,22 @@ vmRenderer.prototype.getCanvasPosition = function (y, voiceName) {
     return ((y - 55) / 180) * 125;
 }
 
-vmRenderer.prototype.drawIntersection = function (firstSegment, secondSegment, x, y, firstVoice, secondVoice) {
+vmRenderer.prototype.drawIntersection = function (firstSegment, secondSegment, x, y) {
     this.ctx.fillStyle = 'red';
     this.ctx.beginPath();
     this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
     this.ctx.fill();
-    this.trajectories[firstVoice].highlight(firstSegment, x);
-    this.trajectories[secondVoice].highlight(secondSegment, x);
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "red";
+    this.ctx.lineWidth = 2
+    this.ctx.moveTo(firstSegment.startX, firstSegment.startY);
+    this.ctx.lineTo(firstSegment.endX, firstSegment.endY);
+    this.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(secondSegment.startX, secondSegment.startY);
+    this.ctx.lineTo(secondSegment.endX, secondSegment.endY);
+    this.ctx.stroke();
+    this.ctx.lineWidth = 1;
 }
 
 function segment(startX, startY, endX, endY) {
@@ -221,30 +230,3 @@ trajectory.prototype.draw = function () {
         this.segments[i].draw();
 }
 
-trajectory.prototype.highlight = function (segment, x) {
-    if (segment.startX <= x - 10 && segment.endX >= x + 10) {
-        // Determine line lengths
-        var xlen = segment.endX - segment.startX;
-        var ylen = segment.endY - segment.startY;
-
-// Determine hypotenuse length
-        var hlen = Math.sqrt(Math.pow(xlen, 2) + Math.pow(ylen, 2));
-
-// The variable identifying the length of the `shortened` line.
-// In this case 50 units.
-        var smallerLen = segment.startX - x +10;
-
-// Determine the ratio between they shortened value and the full hypotenuse.
-        var ratio = smallerLen / hlen;
-
-        var smallerXLen = xlen * ratio;
-        var smallerYLen = ylen * ratio;
-
-// The new X point is the starting x plus the smaller x length.
-        var smallerX = x + smallerXLen;
-
-// Same goes for the new Y.
-        var smallerY = y + smallerYLen;
-        var endPoint = []
-    }
-}
