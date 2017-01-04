@@ -5,14 +5,14 @@ function render() {
     vmCanvas = document.getElementById("vmCanvas");
     renderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     ctx = renderer.getContext();
-    timeSign = getRadioSelected("time");
+    timeSign = getRadioSelected("time"); //save
     beatNum = timeSign.split("/")[0];
     beatValue = timeSign.split("/")[1];
     document.getElementById("del").addEventListener("click", delNotes, false);
     document.getElementById("tie").addEventListener("click", tie, false);
     document.getElementById("visualMelody").addEventListener("click", vmResize, false);
     var selectedNotes = [];
-    var measures = [];
+    var measures = []; //save
     measures.observers = []; //a list of the observers
     measures.subscribe = function (callBack) {
         measures.observers.push(callBack);
@@ -29,7 +29,9 @@ function render() {
         for(var i in measures.observers)
             measures.observers[i].update();
     }
+    //save
     var tiesBetweenMeasures = []; //array of ties that connect notes belonging to different staves
+    //save $("#ks :selected").text() too
     var curIndex = 0;
     vmRenderer = new vmRenderer(measures);
     init();
