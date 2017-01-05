@@ -64,7 +64,7 @@ Measure.prototype.addNote = function (note, voiceName, index) {
     }
 }
 
-//render the measure. the x param is the start of the previous measure
+//Renderer the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
     this.computeScale();
     this.trebleStave = new VF.Stave(x, 20, this.width);
@@ -147,7 +147,7 @@ Measure.prototype.drawNotes = function () {
     }
 }
 
-//render the ties inside the measure
+//Renderer the ties inside the measure
 Measure.prototype.renderTies = function () {
     for (var i = 0; i < this.ties.length; i++) {
         var hasFirst = false;

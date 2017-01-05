@@ -2,7 +2,7 @@ function vmRenderer(measures) {
     this.ctx = vmCanvas.getContext("2d");
     this.drawVoiceNames();
     this.measures = measures;
-    measures.subscribe(this);
+    //measures.subscribe(this);
 }
 
 vmRenderer.prototype.drawVoiceNames = function () {
