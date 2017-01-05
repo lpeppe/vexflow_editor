@@ -75,6 +75,48 @@ vmRenderer.prototype.createTrajectories = function () {
     }
 }
 
+vmRenderer.prototype.createEllipses = function () {
+    this.createVoiceEllipses("basso", "tenore");
+    this.createVoiceEllipses("basso", "alto");
+    this.createVoiceEllipses("basso", "soprano");
+    this.createVoiceEllipses("tenore", "alto");
+    this.createVoiceEllipses("tenore", "soprano");
+    this.createVoiceEllipses("alto", "soprano");
+}
+
+vmRenderer.prototype.createVoiceEllipses = function (firstVoice, secondVoice) {
+    const TOLERANCE = 2;
+    for(var i = 0; i < this.measures.length; i++) {
+        var notes1 = this.measures[i].voices[firstVoice].getTickables();
+        var notes2 = this.measures[i].voices[secondVoice].getTickables();
+        for(var j in notes1) {
+            if(notes1[j] instanceof VF.GhostNote || notes1[j].isRest())
+                break;
+            for(var k in notes2) {
+                if(notes2[k] instanceof  VF.GhostNote || notes2[k].isRest())
+                    break;
+                var x1 = notes1[j].getBoundingBox().getX();
+                var x2 = notes2[k].getBoundingBox().getX();
+                if(x2 > x1)
+                    break;
+                if(Math.abs(x1 - x2) <= TOLERANCE) {
+                    var y1 = this.getCanvasPosition(notes1[j].getBoundingBox().getY(), firstVoice);
+                    var y2 = this.getCanvasPosition(notes2[k].getBoundingBox().getY(), secondVoice);
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x1, (y1+y2)/2, 20, 30, 0, 0, 2 * Math.PI);
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x1, (y1+y2)/2, 20, 30, 0, 0, 2 * Math.PI);
+                    this.ctx.fillStyle = "red";
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.fill();
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+        }
+    }
+}
+
 //find the last note of the measure that is not a rest
 vmRenderer.prototype.findLastNote = function (k, voiceName) {
     for (; k >= 0; k--) {
@@ -97,6 +139,7 @@ vmRenderer.prototype.update = function () {
     this.createTrajectories();
     this.drawTrajectories();
     this.calcIntersections();
+    this.createEllipses();
 }
 
 vmRenderer.prototype.drawTrajectories = function () {
