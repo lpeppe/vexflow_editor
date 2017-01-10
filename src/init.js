@@ -5,11 +5,11 @@ $(document).ready(function () {
         option.text = key;
         keySig.add(option);
     });
-    r = new Renderer();
+     var ren = new Renderer();
     document.getElementById("next").addEventListener("click", function () {
         document.getElementById("firstDiv").style.display = "none";
         document.getElementById("secondDiv").style.display = "block";
-        r.init();
+        ren.init();
     }, false);
 
     document.getElementById("ks").addEventListener("change", preview, false);

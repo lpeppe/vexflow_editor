@@ -1,13 +1,11 @@
 function Renderer() {
+    r = this;
     VF = Vex.Flow;
     canvas = document.getElementById("score");
     scoreDiv = document.getElementById("scoreDiv");
     vmCanvas = document.getElementById("vmCanvas");
     VFRenderer = new VF.Renderer(canvas, Vex.Flow.Renderer.Backends.CANVAS);
     ctx = VFRenderer.getContext();
-    timeSign = getRadioSelected("time"); //save
-    beatNum = timeSign.split("/")[0];
-    beatValue = timeSign.split("/")[1];
     document.getElementById("del").addEventListener("click", this.delNotes, false);
     document.getElementById("tie").addEventListener("click", this.tie, false);
     document.getElementById("visualMelody").addEventListener("click", this.vmResize, false);
@@ -20,6 +18,9 @@ function Renderer() {
 }
 
 Renderer.prototype.init = function () {
+    timeSign = getRadioSelected("time"); //save
+    beatNum = timeSign.split("/")[0];
+    beatValue = timeSign.split("/")[1];
     r.measures.push(new Measure(0));
     r.measures.push(new Measure(1));
     r.measures.push(new Measure(2));
