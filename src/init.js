@@ -12,11 +12,11 @@ $(document).ready(function () {
         ren.init();
     }, false);
     document.getElementById("save").addEventListener("click", function () {
-        var connection = new FireBaseConnection();
+        //var connection = new FireBaseConnection();
         /*var user = connection.login("slech92@gmail.com", "Simone92");
         connection.add_data_db(user.uid, r);*/
-        var user = connection.login("slech92@gmail.com", "Simone92");
-
+        //var user = connection.login("slech92@gmail.com", "Simone92");
+        ren.saveData();
     });
     document.getElementById("ks").addEventListener("change", preview, false);
     var elements = document.getElementsByName("timeLab");

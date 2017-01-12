@@ -158,9 +158,9 @@ Measure.prototype.renderTies = function () {
                 for (var j in this.notesArr[voiceName]) {
                     if (hasFirst)
                         cont++;
-                    if (this.notesArr[voiceName][j] === this.ties[i].first_note)
+                    if (this.notesArr[voiceName][j] === this.ties[i][0].first_note)
                         hasFirst = true;
-                    if (this.notesArr[voiceName][j] === this.ties[i].last_note) {
+                    if (this.notesArr[voiceName][j] === this.ties[i][0].last_note) {
                         hasLast = true;
                         if (!hasFirst || cont > 1) {
                             this.ties.splice(Number(i), 1);
@@ -176,7 +176,7 @@ Measure.prototype.renderTies = function () {
         }
     }
     this.ties.forEach(function (t) {
-        t.setContext(ctx).draw()
+        t[0].setContext(ctx).draw()
     })
 }
 

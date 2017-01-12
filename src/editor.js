@@ -157,27 +157,30 @@ Renderer.prototype.tie = function () {
             //sort the first and second selected notes in selectedNotes
             var firstNote, secondNote;
             var foundFirst = false;
+            var firstIndex, secondIndex;
             var notes = r.measures[r.selectedNotes[0]["index"]].notesArr[r.selectedNotes[0]["voiceName"]];
             for (var i in notes) {
                 if (notes[i] == r.selectedNotes[0]["note"] || notes[i] == r.selectedNotes[1]["note"]) {
                     if (foundFirst) {
                         secondNote = notes[i];
+                        secondIndex = i;
                         break;
                     }
                     else {
                         firstNote = notes[i];
+                        firstIndex = i;
                         foundFirst = true;
                     }
                 }
             }
             if (!(r.areTied(firstNote, secondNote, r.selectedNotes[0]["index"], true))[0]) { //if the notes aren't tied yet
-                r.measures[r.selectedNotes[0]["index"]].ties.push(
+                r.measures[r.selectedNotes[0]["index"]].ties.push([
                     new VF.StaveTie({
                         first_note: firstNote,
                         last_note: secondNote,
                         first_indices: [0],
                         last_indices: [0]
-                    })
+                    }), r.selectedNotes[0]["voiceName"], firstIndex, secondIndex]
                 );
             }
             else { //otherwise remove the tie
@@ -241,7 +244,7 @@ Renderer.prototype.vmResize = function () {
 Renderer.prototype.areTied = function (firstNote, secondNote, index, sameMeasure) {
     if (sameMeasure) {
         for (var i in r.measures[index].ties)
-            if (r.measures[index].ties[i].first_note == firstNote && r.measures[index].ties[i].last_note == secondNote)
+            if (r.measures[index].ties[i][0].first_note == firstNote && r.measures[index].ties[i][0].last_note == secondNote)
                 return [true, i];
         return [false, null];
     }
@@ -379,6 +382,33 @@ Renderer.prototype.getNote = function (y, staveBottom, stave) {
     }
     var notes = {0: 'c', 1: 'd', 2: 'e', 3: 'f', 4: 'g', 5: 'a', 6: 'b'};
     return notes[note] + '/' + octave;
+}
+
+Renderer.prototype.saveData = function () {
+    var data = new EditorData($("#ks :selected").text(), timeSign);
+    for(var i in r.tiesBetweenMeasures)
+        data.tiesBetweenMeasures.push(new TieData(r.tiesBetweenMeasures[i][1], r.tiesBetweenMeasures[i][2]));
+    for(var i in r.measures) {
+        var measure = new MeasureData(i);
+        for(var voiceName in r.measures[i].notesArr) {
+            for(var j in r.measures[i].notesArr[voiceName]) {
+                var note = r.measures[i].notesArr[voiceName][j];
+                var accidental = null;
+                var isRest = false;
+                if(note.isRest())
+                    isRest = true;
+                if(note.modifiers.length > 0)
+                    accidental = note.modifiers[0].type;
+                var noteData = new NoteData(note.duration, isRest, note.keys, accidental);
+                measure.notesArr[voiceName].push(noteData);
+            }
+        }
+        for(var k in r.measures[i].ties)
+            measure.ties.push(new TieData(r.measures[i].ties[k][1], [r.measures[i].ties[k][2], r.measures[i].ties[k][3]]))
+        data.measures.push(measure);
+    }
+    var connection = new FireBaseConnection();
+    var user = connection.login("slech92@gmail.com", "Simone92", data);
 }
 
 //return the radio element selected with the given name

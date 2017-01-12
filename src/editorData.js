@@ -5,18 +5,16 @@ function EditorData(keySign, timeSign) {
     this.tiesBetweenMeasures = [];
 }
 
-function NoteData(duration, isRest, keys, accidental, voice, id) {
+function NoteData(duration, isRest, keys, accidental) {
     this.duration = duration;
     this.isRest = isRest;
     this.keys = keys;
     this.accidental = accidental;
-    this.voice = voice;
-    this.id = id;
 }
 
-function TieData(firstNote, lastNote) {
-    this.firstNote = firstNote;
-    this.lastNote = lastNote;
+function TieData(firstParam, lastParam) {
+    this.firstParam = firstParam;
+    this.lastParam = lastParam;
 }
 
 function MeasureData(index) {

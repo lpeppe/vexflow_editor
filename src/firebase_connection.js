@@ -12,12 +12,12 @@ function FireBaseConnection() {
     this.rootRef = firebase.database().ref();
 
     //effettua il login, i parametri in input sono email e password dell'utente.
-    this.login = function (email, password) {
+    this.login = function (email, password, data) {
         firebase.auth().signInWithEmailAndPassword(email, password)
                 .then(
                         function (firebaseUser) {
                             //alert("Login effettuato!");
-                            fc.add_data_db(firebase.auth().currentUser.uid, r)
+                            fc.add_data_db(firebase.auth().currentUser.uid, data)
                         })
                 .catch(
                         function (error) {
