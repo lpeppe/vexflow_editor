@@ -11,7 +11,13 @@ $(document).ready(function () {
         document.getElementById("secondDiv").style.display = "block";
         ren.init();
     }, false);
+    document.getElementById("save").addEventListener("click", function () {
+        var connection = new FireBaseConnection();
+        /*var user = connection.login("slech92@gmail.com", "Simone92");
+        connection.add_data_db(user.uid, r);*/
+        var user = connection.login("slech92@gmail.com", "Simone92");
 
+    });
     document.getElementById("ks").addEventListener("change", preview, false);
     var elements = document.getElementsByName("timeLab");
     for (i = 0; i < elements.length; i++)
