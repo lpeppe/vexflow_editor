@@ -6,7 +6,6 @@ $(document).ready(function () {
         keySig.add(option);
     });
      var ren = new Renderer();
-    connection = new FireBaseConnection();
     document.getElementById("next").addEventListener("click", function () {
         document.getElementById("firstDiv").style.display = "none";
         document.getElementById("secondDiv").style.display = "block";

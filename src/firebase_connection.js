@@ -85,7 +85,7 @@ function FireBaseConnection() {
 
     this.return_all_data = function (uid) {
         firebase.database().ref(uid).orderByKey().on("child_added", function (data) {
-            alert(data.key);
+            r.restoreData(data.exportVal())
         });
 
     };

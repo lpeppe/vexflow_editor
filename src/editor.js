@@ -15,12 +15,15 @@ function Renderer() {
     //save
     this.tiesBetweenMeasures = []; //array of ties that connect notes belonging to different staves
     //save $("#ks :selected").text() too
+    this.connection = new FireBaseConnection();
+    this.user;
 }
 
 Renderer.prototype.init = function () {
-    timeSign = getRadioSelected("time"); //save
-    beatNum = timeSign.split("/")[0];
-    beatValue = timeSign.split("/")[1];
+    r.timeSign = getRadioSelected("time"); //save
+    r.beatNum = r.timeSign.split("/")[0];
+    r.beatValue = r.timeSign.split("/")[1];
+    r.keySign = $("#ks :selected").text();
     r.measures.push(new Measure(0));
     r.measures.push(new Measure(1));
     r.measures.push(new Measure(2));
@@ -101,6 +104,7 @@ Renderer.prototype.isSelected = function isSelected(note, x, y, voiceName) {
     var bb = note.getBoundingBox();
     var offset = 0;
     if (voiceName == "tenore" || voiceName == "soprano") //if the stem is up the height must be lowered by 30
+        if(note.duration != "w" && !note.isRest())
         offset = 30;
     else if (note.isRest() && note.duration == "q")
         offset = 10;
@@ -145,10 +149,10 @@ Renderer.prototype.delNotes = function () {
         r.measures[r.selectedNotes[i]["index"]].minNote = 1; //reset the min note to resize the measure properly
     }
     var toUpdate = [];
-    for(var k in r.selectedNotes)
-        if(!(toUpdate.includes(r.selectedNotes[k]["index"])))
+    for (var k in r.selectedNotes)
+        if (!(toUpdate.includes(r.selectedNotes[k]["index"])))
             toUpdate.push(r.selectedNotes[k]["index"]);
-    for(var i in toUpdate)
+    for (var i in toUpdate)
         r.measures[toUpdate[i]].updateTiesIndex();
     //after deleting empty the selectedNotes array
     r.selectedNotes.splice(0, r.selectedNotes.length)
@@ -391,30 +395,83 @@ Renderer.prototype.getNote = function (y, staveBottom, stave) {
 }
 
 Renderer.prototype.saveData = function () {
-    var data = new EditorData($("#ks :selected").text(), timeSign);
-    for(var i in r.tiesBetweenMeasures)
+    var data = new EditorData(r.keySign, r.timeSign);
+    for (var i in r.tiesBetweenMeasures)
         data.tiesBetweenMeasures.push(new TieData(r.tiesBetweenMeasures[i][1], r.tiesBetweenMeasures[i][2]));
-    for(var i in r.measures) {
+    for (var i in r.measures) {
         var measure = new MeasureData(i);
-        for(var voiceName in r.measures[i].notesArr) {
-            for(var j in r.measures[i].notesArr[voiceName]) {
+        for (var voiceName in r.measures[i].notesArr) {
+            for (var j in r.measures[i].notesArr[voiceName]) {
                 var note = r.measures[i].notesArr[voiceName][j];
                 var accidental = null;
-                if(note.modifiers.length > 0)
+                if (note.modifiers.length > 0)
                     accidental = note.modifiers[0].type;
                 var noteData = new NoteData(note.duration, note.isRest() == undefined ? false : true, note.keys, accidental);
                 measure.notesArr[voiceName].push(noteData);
             }
         }
-        for(var k in r.measures[i].ties)
+        for (var k in r.measures[i].ties)
             measure.ties.push(new TieData(r.measures[i].ties[k][1], r.measures[i].ties[k][2]))
         data.measures.push(measure);
     }
-    var user = connection.login("slech92@gmail.com", "Simone92", data);
+    r.user = r.connection.login("slech92@gmail.com", "Simone92", data);
 }
 
 Renderer.prototype.loadData = function () {
+    r.connection.return_all_data(r.user.uid)
+}
 
+Renderer.prototype.restoreData = function (data) {
+    console.log(data)
+    r.timeSign = data["timeSign"]
+    r.beatNum = r.timeSign.split("/")[0];
+    r.beatValue = r.timeSign.split("/")[1];
+    r.keySign = data["keySign"];
+    r.measures.splice(0, r.measures.length);
+    r.tiesBetweenMeasures.splice(0, r.tiesBetweenMeasures.length)
+    r.selectedNotes.splice(0, r.selectedNotes.length)
+    for (var i in data["measures"]) {
+        var measure = data["measures"][i];
+        r.measures.push(new Measure(measure["index"]));
+        for (var voiceName in measure["notesArr"]) {
+            for (var j in measure["notesArr"][voiceName]) {
+                var note = measure["notesArr"][voiceName][j];
+                var vexNote;
+                if (voiceName == "basso" || voiceName == "tenore")
+                    vexNote = new VF.StaveNote({clef: "bass", keys: [note["keys"][0]], duration: note["duration"]});
+                else
+                    vexNote = new VF.StaveNote({clef: "treble", keys: [note["keys"][0]], duration: note["duration"]});
+                if (note["accidental"] != undefined)
+                    vexNote.addAccidental(0, new VF.Accidental(note["accidental"]));
+                r.measures[i].addNote(vexNote, voiceName, j);
+            }
+        }
+        if (measure["ties"] != undefined) {
+            for (var j in measure["ties"]) {
+                var tie = measure["ties"][j];
+                r.measures[i].ties.push([new VF.StaveTie({
+                    first_note: r.measures[i].notesArr[tie["firstParam"]][tie["lastParam"]],
+                    last_note: r.measures[i].notesArr[tie["firstParam"]][(tie["lastParam"]) * 1 + 1],
+                    first_indices: [0],
+                    last_indices: [0]
+                }), tie["firstParam"], tie["lastParam"]]);
+            }
+        }
+    }
+    if (data["tiesBetweenMeasures"] != undefined) {
+        for (var i in data["tiesBetweenMeasures"]) {
+            var tie = data["tiesBetweenMeasures"][i];
+            var firstVoiceNotes = r.measures[tie["firstParam"]].notesArr[tie["lastParam"]];
+            r.tiesBetweenMeasures.push([new VF.StaveTie({
+                first_note: firstVoiceNotes[firstVoiceNotes.length - 1],
+                last_note: r.measures[(tie["firstParam"]) * 1 + 1].notesArr[tie["lastParam"]][0],
+                first_indices: [0],
+                last_indices: [0]
+            }), tie["firstParam"], tie["lastParam"]
+            ]);
+        }
+    }
+    r.renderAndDraw();
 }
 //return the radio element selected with the given name
 function getRadioSelected(name) {
