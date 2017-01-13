@@ -400,12 +400,9 @@ Renderer.prototype.saveData = function () {
             for(var j in r.measures[i].notesArr[voiceName]) {
                 var note = r.measures[i].notesArr[voiceName][j];
                 var accidental = null;
-                var isRest = false;
-                if(note.isRest())
-                    isRest = true;
                 if(note.modifiers.length > 0)
                     accidental = note.modifiers[0].type;
-                var noteData = new NoteData(note.duration, isRest, note.keys, accidental);
+                var noteData = new NoteData(note.duration, note.isRest() == undefined ? false : true, note.keys, accidental);
                 measure.notesArr[voiceName].push(noteData);
             }
         }
@@ -413,10 +410,12 @@ Renderer.prototype.saveData = function () {
             measure.ties.push(new TieData(r.measures[i].ties[k][1], r.measures[i].ties[k][2]))
         data.measures.push(measure);
     }
-    var connection = new FireBaseConnection();
     var user = connection.login("slech92@gmail.com", "Simone92", data);
 }
 
+Renderer.prototype.loadData = function () {
+
+}
 //return the radio element selected with the given name
 function getRadioSelected(name) {
     var elements = document.getElementsByName(name);
