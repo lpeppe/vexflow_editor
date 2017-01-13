@@ -8,7 +8,7 @@ function Measure(index) {
         "alto": []
     };
     /*setMode(3) allows to insert notes inside the measure even if the measure is not complete, but
-    throws an exception if the duration of the inserted notes exceeds the time signature*/
+     throws an exception if the duration of the inserted notes exceeds the time signature*/
     this.voices = {
         "basso": new VF.Voice({
             num_beats: beatNum, beat_value: beatValue,
@@ -40,8 +40,8 @@ Measure.prototype.getIndex = function () {
 }
 
 /*adds a note in the measure
-in case adding the note generates an error (the new inserted note exceeds the time signature),
-the voice is restored to the previous state*/
+ in case adding the note generates an error (the new inserted note exceeds the time signature),
+ the voice is restored to the previous state*/
 Measure.prototype.addNote = function (note, voiceName, index) {
     this.notesArr[voiceName].splice(index, 0, note);
     try {
@@ -217,4 +217,19 @@ Measure.prototype.isEmpty = function () {
         if (this.notesArr[voiceName].length > 0)
             return false;
     return true;
+}
+
+Measure.prototype.updateTiesIndex = function () {
+    for (var i in this.ties) {
+        loop:
+            for (var voiceName in this.notesArr) {
+                for (var j in this.notesArr[voiceName]) {
+                    if (this.ties[i][0].first_note == this.notesArr[voiceName][j]) {
+                        this.ties[i][2] = j;
+                        this.ties[i][3] = j + 1;
+                        break loop;
+                    }
+                }
+            }
+    }
 }

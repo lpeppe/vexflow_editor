@@ -144,6 +144,12 @@ Renderer.prototype.delNotes = function () {
                 notes.splice(Number(j), 1);
         r.measures[r.selectedNotes[i]["index"]].minNote = 1; //reset the min note to resize the measure properly
     }
+    var toUpdate = [];
+    for(var k in r.selectedNotes)
+        if(!(toUpdate.includes(r.selectedNotes[k]["index"])))
+            toUpdate.push(r.selectedNotes[k]["index"]);
+    for(var i in toUpdate)
+        r.measures[toUpdate[i]].updateTiesIndex();
     //after deleting empty the selectedNotes array
     r.selectedNotes.splice(0, r.selectedNotes.length)
     r.renderAndDraw();
@@ -276,6 +282,7 @@ Renderer.prototype.addNote = function (e) {
     else {
         var pos = r.calcNoteIndex(i, voice, e.clientX - canvas.getBoundingClientRect().left);
         r.measures[i].addNote(newNote, voice, pos);
+        r.measures[i].updateTiesIndex();
     }
     //add new measures
     if (i >= r.measures.length - 2)
