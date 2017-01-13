@@ -163,13 +163,12 @@ Renderer.prototype.tie = function () {
             //sort the first and second selected notes in selectedNotes
             var firstNote, secondNote;
             var foundFirst = false;
-            var firstIndex, secondIndex;
+            var firstIndex;
             var notes = r.measures[r.selectedNotes[0]["index"]].notesArr[r.selectedNotes[0]["voiceName"]];
             for (var i in notes) {
                 if (notes[i] == r.selectedNotes[0]["note"] || notes[i] == r.selectedNotes[1]["note"]) {
                     if (foundFirst) {
                         secondNote = notes[i];
-                        secondIndex = i;
                         break;
                     }
                     else {
@@ -186,7 +185,7 @@ Renderer.prototype.tie = function () {
                         last_note: secondNote,
                         first_indices: [0],
                         last_indices: [0]
-                    }), r.selectedNotes[0]["voiceName"], firstIndex, secondIndex]
+                    }), r.selectedNotes[0]["voiceName"], firstIndex]
                 );
             }
             else { //otherwise remove the tie
@@ -411,7 +410,7 @@ Renderer.prototype.saveData = function () {
             }
         }
         for(var k in r.measures[i].ties)
-            measure.ties.push(new TieData(r.measures[i].ties[k][1], [r.measures[i].ties[k][2], r.measures[i].ties[k][3]]))
+            measure.ties.push(new TieData(r.measures[i].ties[k][1], r.measures[i].ties[k][2]))
         data.measures.push(measure);
     }
     var connection = new FireBaseConnection();

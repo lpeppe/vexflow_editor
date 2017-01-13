@@ -226,7 +226,6 @@ Measure.prototype.updateTiesIndex = function () {
                 for (var j in this.notesArr[voiceName]) {
                     if (this.ties[i][0].first_note == this.notesArr[voiceName][j]) {
                         this.ties[i][2] = j;
-                        this.ties[i][3] = j + 1;
                         break loop;
                     }
                 }
