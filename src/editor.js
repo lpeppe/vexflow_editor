@@ -436,11 +436,13 @@ Renderer.prototype.restoreData = function (data) {
         for (var voiceName in measure["notesArr"]) {
             for (var j in measure["notesArr"][voiceName]) {
                 var note = measure["notesArr"][voiceName][j];
-                var vexNote;
+                var vexNote, duration = note["duration"];
+                if(note["isRest"])
+                    duration += "r";
                 if (voiceName == "basso" || voiceName == "tenore")
-                    vexNote = new VF.StaveNote({clef: "bass", keys: [note["keys"][0]], duration: note["duration"]});
+                    vexNote = new VF.StaveNote({clef: "bass", keys: [note["keys"][0]], duration: duration});
                 else
-                    vexNote = new VF.StaveNote({clef: "treble", keys: [note["keys"][0]], duration: note["duration"]});
+                    vexNote = new VF.StaveNote({clef: "treble", keys: [note["keys"][0]], duration: duration});
                 if (note["accidental"] != undefined)
                     vexNote.addAccidental(0, new VF.Accidental(note["accidental"]));
                 r.measures[i].addNote(vexNote, voiceName, j);
