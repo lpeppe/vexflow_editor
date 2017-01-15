@@ -273,11 +273,15 @@ Renderer.prototype.addNote = function (e) {
     var voice = getRadioSelected("voice");
     var pitch = r.calculatePitch(e, voice);
     var newNote;
+    if(pitch.split("/")[0] == "b" || pitch.split("/")[0] == "e" && accidental == "#")
+        accidental = "clear"
+    if(pitch.split("/")[0] == "f" || pitch.split("/")[0] == "c" && accidental == "b")
+        accidental = "clear"
     if (voice == "basso" || voice == "tenore")
         newNote = new Vex.Flow.StaveNote({clef: "bass", keys: [pitch], duration: duration});
     else
         newNote = new Vex.Flow.StaveNote({clef: "treble", keys: [pitch], duration: duration});
-    if (accidental != "clear")
+    if (accidental != "clear" && !newNote.isRest())
         newNote.addAccidental(0, new VF.Accidental(accidental));
     var i = r.getMeasureIndex(e.clientX - canvas.getBoundingClientRect().left);
     if (r.measures[i].isEmpty())
@@ -391,6 +395,7 @@ Renderer.prototype.getNote = function (y, staveBottom, stave) {
             note++;
     }
     var notes = {0: 'c', 1: 'd', 2: 'e', 3: 'f', 4: 'g', 5: 'a', 6: 'b'};
+    console.log(notes[note] + '/' + octave)
     return notes[note] + '/' + octave;
 }
 

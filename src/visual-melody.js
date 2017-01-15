@@ -100,21 +100,90 @@ vmRenderer.prototype.createVoiceEllipses = function (firstVoice, secondVoice) {
                 if(x2 > x1)
                     break;
                 if(Math.abs(x1 - x2) <= TOLERANCE) {
+                    var isUnisone = false;
+                    if(this.isUnisonInterval(notes1[j], notes2[k])) {
+                        this.ctx.fillStyle = "green";
+                        this.ctx.strokeStyle = "green";
+                        isUnisone = true;
+                    }
+                    else if(this.isFifthInterval(notes1[j], notes2[k])) {
+                        this.ctx.fillStyle = "blue";
+                        this.ctx.strokeStyle = "blue";
+                    }
+                    else if(this.isOctaveInterval(notes1[j], notes2[k])) {
+                        this.ctx.fillStyle = "yellow";
+                        this.ctx.strokeStyle = "yellow";
+                    }
+                    else
+                        break;
                     var y1 = this.getCanvasPosition(notes1[j].getBoundingBox().getY(), firstVoice);
                     var y2 = this.getCanvasPosition(notes2[k].getBoundingBox().getY(), secondVoice);
                     this.ctx.beginPath();
-                    this.ctx.ellipse(x1, (y1+y2)/2, 20, 30, 0, 0, 2 * Math.PI);
+                    this.ctx.globalAlpha = 0.8;
+                    this.ctx.ellipse(x1, (y1+y2)/2, 20, isUnisone ? 20 : Math.abs(y1 - y2), 0, 0, 2 * Math.PI);
                     this.ctx.stroke();
                     this.ctx.beginPath();
-                    this.ctx.ellipse(x1, (y1+y2)/2, 20, 30, 0, 0, 2 * Math.PI);
-                    this.ctx.fillStyle = "red";
                     this.ctx.globalAlpha = 0.5;
+                    this.ctx.ellipse(x1, (y1+y2)/2, 20, isUnisone ? 20 : Math.abs(y1 - y2), 0, 0, 2 * Math.PI);
                     this.ctx.fill();
                     this.ctx.globalAlpha = 1;
                 }
             }
         }
     }
+}
+
+vmRenderer.prototype.isUnisonInterval = function(note1, note2) {
+    var noteValue1 = this.getNoteValue(note1);
+    var noteValue2 = this.getNoteValue(note2);
+    return (noteValue1 == noteValue2);
+}
+
+vmRenderer.prototype.isFifthInterval = function(note1, note2) {
+    var noteValue1 = this.getNoteValue(note1);
+    var noteValue2 = this.getNoteValue(note2);
+    return((Math.abs(noteValue1 - noteValue2) % 7) == 0);
+}
+
+vmRenderer.prototype.isOctaveInterval = function(note1, note2) {
+    var noteValue1 = this.getNoteValue(note1);
+    var noteValue2 = this.getNoteValue(note2);
+    return((Math.abs(noteValue1 - noteValue2) % 12) == 0);
+}
+
+vmRenderer.prototype.getNoteValue = function (note) {
+    var semitones = {
+        "c": 0,
+        "c#": 1,
+        "d": 2,
+        "eb": 3,
+        "e": 4,
+        "f": 5,
+        "f#": 6,
+        "g": 7,
+        "ab": 8,
+        "a": 9,
+        "bb": 10,
+        "b": 11
+    };
+    var accidental;
+    if (note.modifiers.length > 0 && note.modifiers[0].type != "n")
+        accidental = note.modifiers[0].type;
+    var n = note.getKeys()[0].split("/")[0];
+    var octave = note.getKeys()[0].split("/")[1];
+    if(accidental != undefined)
+        n += accidental;
+    if(n == "db")
+        n = "c#";
+    else if(n == "d#")
+        n = "eb";
+    else if(n == "gb")
+        n = "f#";
+    else if(n == "g#")
+        n = "ab";
+    else if(n == "a#")
+        n = "bb";
+    return(semitones[n] + (12 * octave))
 }
 
 //find the last note of the measure that is not a rest
