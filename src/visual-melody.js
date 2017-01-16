@@ -294,9 +294,9 @@ segment.prototype.calcIntersection = function (otherSegment) {
     b = numerator2 / denominator;
     result.x = this.startX + (a * (this.endX - this.startX));
     result.y = this.startY + (a * (this.endY - this.startY));
-    if (a >= 0 && a <= 1)
+    if (a > 0 && a < 1)
         result.onLine1 = true;
-    if (b >= 0 && b <= 1)
+    if (b > 0 && b < 1)
         result.onLine2 = true;
     //the segments intersect if both are true
     return result;
