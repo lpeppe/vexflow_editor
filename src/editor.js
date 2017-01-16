@@ -395,7 +395,6 @@ Renderer.prototype.getNote = function (y, staveBottom, stave) {
             note++;
     }
     var notes = {0: 'c', 1: 'd', 2: 'e', 3: 'f', 4: 'g', 5: 'a', 6: 'b'};
-    console.log(notes[note] + '/' + octave)
     return notes[note] + '/' + octave;
 }
 
@@ -427,7 +426,6 @@ Renderer.prototype.loadData = function () {
 }
 
 Renderer.prototype.restoreData = function (data) {
-    console.log(data)
     r.timeSign = data["timeSign"]
     r.beatNum = r.timeSign.split("/")[0];
     r.beatValue = r.timeSign.split("/")[1];
