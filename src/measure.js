@@ -1,5 +1,5 @@
 //index represents the position of the measure inside the stave
-function Measure(index) {
+function Measure(index, ctx, beatNum, beatValue, keySign, timeSign) {
     this.index = index;
     this.notesArr = {
         "basso": [],
@@ -7,29 +7,34 @@ function Measure(index) {
         "soprano": [],
         "alto": []
     };
+    this.beatNum = beatNum;
+    this.beatValue = beatValue;
+    this.keySign = keySign;
+    this.timeSign = timeSign;
     /*setMode(3) allows to insert notes inside the measure even if the measure is not complete, but
      throws an exception if the duration of the inserted notes exceeds the time signature*/
     this.voices = {
-        "basso": new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        "basso": new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3),
-        "tenore": new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        "tenore": new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3),
-        "alto": new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        "alto": new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3),
-        "soprano": new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        "soprano": new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3)
     };
     //array of ties inside the measure
+    this.ctx = ctx;
     this.ties = [];
-    this.formatter = new VF.Formatter();
+    this.formatter = new Vex.Flow.Formatter();
     this.minNote = 1; //1 is w, 2 is h, 3 is q, 4 is 8, 5 is 16
     this.width;
     this.computeScale();
@@ -47,8 +52,8 @@ Measure.prototype.addNote = function (note, voiceName, index) {
     try {
         if (voiceName == "basso" || voiceName == "alto")
             note.setStemDirection(-1);
-        this.voices[voiceName] = new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        this.voices[voiceName] = new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3);
         this.voices[voiceName].addTickables(this.notesArr[voiceName]);
@@ -56,8 +61,8 @@ Measure.prototype.addNote = function (note, voiceName, index) {
     catch (err) {
         //this.notesArr[voiceName].pop();
         this.notesArr[voiceName].splice(index, 1);
-        this.voices[voiceName] = new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        this.voices[voiceName] = new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3);
         this.voices[voiceName].addTickables(this.notesArr[voiceName]);
@@ -67,12 +72,12 @@ Measure.prototype.addNote = function (note, voiceName, index) {
 //Renderer the measure. the x param is the start of the previous measure
 Measure.prototype.render = function (x) {
     this.computeScale();
-    this.trebleStave = new VF.Stave(x, 20, this.width);
-    this.bassStave = new VF.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
+    this.trebleStave = new Vex.Flow.Stave(x, 20, this.width);
+    this.bassStave = new Vex.Flow.Stave(x, this.trebleStave.getBottomLineY() + 10, this.width);
     if (this.index == 0) {
-        this.trebleStave.addClef("treble").addTimeSignature(r.timeSign);
-        this.bassStave.addClef("bass").addTimeSignature(r.timeSign);
-        var keySign = r.keySign;
+        this.trebleStave.addClef("treble").addTimeSignature(this.timeSign);
+        this.bassStave.addClef("bass").addTimeSignature(this.timeSign);
+        var keySign = this.keySign;
         this.trebleStave.addKeySignature(keySign);
         this.bassStave.addKeySignature(keySign);
         this.bassStave.setNoteStartX(this.trebleStave.getNoteStartX());
@@ -80,8 +85,8 @@ Measure.prototype.render = function (x) {
             - this.bassStave.getX() + this.width);
         this.trebleStave.setWidth(this.trebleStave.getNoteStartX() - this.trebleStave.getX() + this.width);
     }
-    this.trebleStave.setContext(ctx).draw();
-    this.bassStave.setContext(ctx).draw();
+    this.trebleStave.setContext(this.ctx).draw();
+    this.bassStave.setContext(this.ctx).draw();
 }
 
 //calculate the width of the stave based on the note with the minimum duration
@@ -103,7 +108,7 @@ Measure.prototype.isComplete = function (voiceName) {
     /*this.restoreVoices();
      return this.voices[voiceName].isComplete();*/
     for (var i in this.voices[voiceName].getTickables())
-        if (this.voices[voiceName].getTickables()[i] instanceof VF.GhostNote)
+        if (this.voices[voiceName].getTickables()[i] instanceof Vex.Flow.GhostNote)
             return false;
     return this.voices[voiceName].isComplete();
 }
@@ -141,9 +146,9 @@ Measure.prototype.drawNotes = function () {
     this.formatter.format(toFormat, this.width);
     for (var voice in this.voices) {
         if (voice == "basso" || voice == "tenore")
-            this.voices[voice].draw(ctx, this.bassStave);
+            this.voices[voice].draw(this.ctx, this.bassStave);
         else
-            this.voices[voice].draw(ctx, this.trebleStave);
+            this.voices[voice].draw(this.ctx, this.trebleStave);
     }
 }
 
@@ -175,6 +180,7 @@ Measure.prototype.renderTies = function () {
             i--;
         }
     }
+    var ctx = this.ctx;
     this.ties.forEach(function (t) {
         t[0].setContext(ctx).draw()
     })
@@ -203,8 +209,8 @@ Measure.prototype.completeVoices = function () {
 //remove ghostNotes from the voices
 Measure.prototype.restoreVoices = function () {
     for (var voice in this.voices) {
-        this.voices[voice] = new VF.Voice({
-            num_beats: r.beatNum, beat_value: r.beatValue,
+        this.voices[voice] = new Vex.Flow.Voice({
+            num_beats: this.beatNum, beat_value: this.beatValue,
             resolution: Vex.Flow.RESOLUTION
         }).setMode(3);
         this.voices[voice].addTickables(this.notesArr[voice]);

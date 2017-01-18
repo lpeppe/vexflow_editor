@@ -5,7 +5,7 @@ $(document).ready(function () {
         option.text = key;
         keySig.add(option);
     });
-     var ren = new Renderer();
+     var ren = new Renderer("score", "scoreDiv", "vmCanvas");
     document.getElementById("next").addEventListener("click", function () {
         document.getElementById("firstDiv").style.display = "none";
         document.getElementById("secondDiv").style.display = "block";
@@ -22,16 +22,15 @@ $(document).ready(function () {
     for (i = 0; i < elements.length; i++)
         elements[i].addEventListener("click", preview, false);
     document.getElementById("ks").addEventListener("change", preview, false);
-    var VF = Vex.Flow;
     var prevDiv = document.getElementById("prev");
-    var renderer = new VF.Renderer(prevDiv, Vex.Flow.Renderer.Backends.SVG);
+    var renderer = new Vex.Flow.Renderer(prevDiv, Vex.Flow.Renderer.Backends.SVG);
     var ctx = renderer.getContext();
     renderer.resize(200, 150);
     preview();
 
     function preview() {
         ctx.clear();
-        var prevStave = new VF.Stave(10, 20, 200);
+        var prevStave = new Vex.Flow.Stave(10, 20, 200);
         if(arguments.length == 0 || arguments[0].target.tagName != "LABEL")
             var timeSign = getRadioSelected("time");
         else

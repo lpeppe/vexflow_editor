@@ -1,7 +1,9 @@
-function vmRenderer(measures) {
+function vmRenderer(measures, canvas, vmCanvas) {
     this.ctx = vmCanvas.getContext("2d");
     this.drawVoiceNames();
     this.measures = measures;
+    this.canvas = canvas;
+    this.vmCanvas = vmCanvas;
     //measures.subscribe(this);
 }
 
@@ -32,17 +34,17 @@ vmRenderer.prototype.drawMeasureLines = function () {
 
 vmRenderer.prototype.createTrajectories = function () {
     this.trajectories = {
-        "basso": new trajectory("basso"),
-        "tenore": new trajectory("tenore"),
-        "alto": new trajectory("alto"),
-        "soprano": new trajectory("soprano")
+        "basso": new trajectory("basso", this.ctx),
+        "tenore": new trajectory("tenore", this.ctx),
+        "alto": new trajectory("alto", this.ctx),
+        "soprano": new trajectory("soprano", this.ctx)
     };
     for (var i in this.measures) {
         for (var voiceName in this.measures[i].voices) {
             var count = 0, firstX, firstY;
             var notes = this.measures[i].voices[voiceName].getTickables();
             for (var j in notes) {
-                if (notes[j] instanceof VF.GhostNote)
+                if (notes[j] instanceof Vex.Flow.GhostNote)
                     break;
                 if (notes[j].isRest())
                     continue;
@@ -53,7 +55,7 @@ vmRenderer.prototype.createTrajectories = function () {
                         firstX = last[1].getBoundingBox().getX();
                         firstY = this.getCanvasPosition(last[1].getBoundingBox().getY(), voiceName);
                         this.trajectories[voiceName].push(new segment(firstX, firstY,
-                            notes[j].getBoundingBox().getX(), this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName)));
+                            notes[j].getBoundingBox().getX(), this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName), this.ctx));
                         firstX = notes[j].getBoundingBox().getX();
                         firstY = this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName);
                         count++;
@@ -66,7 +68,7 @@ vmRenderer.prototype.createTrajectories = function () {
                 }
                 else {
                     this.trajectories[voiceName].push(new segment(firstX, firstY,
-                        notes[j].getBoundingBox().getX(), this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName)));
+                        notes[j].getBoundingBox().getX(), this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName), this.ctx));
                     firstX = notes[j].getBoundingBox().getX();
                     firstY = this.getCanvasPosition(notes[j].getBoundingBox().getY(), voiceName);
                 }
@@ -90,10 +92,10 @@ vmRenderer.prototype.createVoiceEllipses = function (firstVoice, secondVoice) {
         var notes1 = this.measures[i].voices[firstVoice].getTickables();
         var notes2 = this.measures[i].voices[secondVoice].getTickables();
         for(var j in notes1) {
-            if(notes1[j] instanceof VF.GhostNote || notes1[j].isRest())
+            if(notes1[j] instanceof Vex.Flow.GhostNote || notes1[j].isRest())
                 break;
             for(var k in notes2) {
-                if(notes2[k] instanceof  VF.GhostNote || notes2[k].isRest())
+                if(notes2[k] instanceof  Vex.Flow.GhostNote || notes2[k].isRest())
                     break;
                 var x1 = notes1[j].getBoundingBox().getX();
                 var x2 = notes2[k].getBoundingBox().getX();
@@ -200,8 +202,8 @@ vmRenderer.prototype.findLastNote = function (k, voiceName) {
 }
 
 vmRenderer.prototype.update = function () {
-    this.ctx.clearRect(0, 0, vmCanvas.width, vmCanvas.height);
-    vmCanvas.width = canvas.width;
+    this.ctx.clearRect(0, 0, this.vmCanvas.width, this.vmCanvas.height);
+    this.vmCanvas.width = this.canvas.width;
     this.drawVoiceNames();
     this.drawMeasureLines();
     this.ctx.setLineDash([5, 0]);
@@ -262,18 +264,19 @@ vmRenderer.prototype.drawIntersection = function (firstSegment, secondSegment, x
     this.ctx.lineWidth = 1;
 }
 
-function segment(startX, startY, endX, endY) {
+function segment(startX, startY, endX, endY, ctx) {
     this.startX = startX;
     this.startY = startY;
     this.endX = endX;
     this.endY = endY;
+    this.ctx = ctx;
 }
 
 segment.prototype.draw = function () {
-    vmRenderer.ctx.beginPath();
-    vmRenderer.ctx.moveTo(this.startX, this.startY);
-    vmRenderer.ctx.lineTo(this.endX, this.endY);
-    vmRenderer.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.startX, this.startY);
+    this.ctx.lineTo(this.endX, this.endY);
+    this.ctx.stroke();
 }
 
 segment.prototype.calcIntersection = function (otherSegment) {
@@ -302,9 +305,10 @@ segment.prototype.calcIntersection = function (otherSegment) {
     return result;
 }
 
-function trajectory(voiceName) {
+function trajectory(voiceName, ctx) {
     this.segments = [];
     this.voiceName = voiceName;
+    this.ctx = ctx;
 }
 
 trajectory.prototype.getSegmentsBetween = function (x1, x2) {
@@ -326,16 +330,16 @@ trajectory.prototype.push = function (segment) {
 trajectory.prototype.draw = function () {
     switch (this.voiceName) {
         case "basso":
-            vmRenderer.ctx.strokeStyle = "black";
+            this.ctx.strokeStyle = "black";
             break;
         case "tenore":
-            vmRenderer.ctx.strokeStyle = "blue";
+            this.ctx.strokeStyle = "blue";
             break;
         case "alto":
-            vmRenderer.ctx.strokeStyle = "#ffc444";
+            this.ctx.strokeStyle = "#ffc444";
             break;
         case "soprano":
-            vmRenderer.ctx.strokeStyle = "#019117";
+            this.ctx.strokeStyle = "#019117";
             break;
     }
     for (var i in this.segments)
